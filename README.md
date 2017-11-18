@@ -89,6 +89,11 @@ within the system. The following functions are supported:
 
 ### charlist ###
 
+Maintain a list of known characters. Characters are identified by a _code_
+which is arrived at by interpreting the character's bitmap as a bit stream
+and encoding this stream in ASCII by taking chunks of 6 bits. This "code"
+is the standard representation of a character bitmap throughout the system.
+
 ### charutils ###
 
 Utilities that operate on a single character.
@@ -96,10 +101,10 @@ Module to convert back-and-forth between a `Bitmap` structure and a
 compressed string representing a single character. It also provides support
 for dumping a debug version of a bitmap or a string to `stdout`.
 
- - `char *bitmap_to_string(Bitmap bm)`
- - `Bitmap string_to_bitmap(char *string)`
+ - `char *bitmap_to_code(Bitmap bm)`
+ - `Bitmap code_to_bitmap(char *code)`
  - `void dump_bitmap(Bitmap bm)`
- - `void dump_string(char *string)`
+ - `void dump_code(char *code)`
 
 ### common ###
 
