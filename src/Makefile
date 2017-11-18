@@ -1,13 +1,16 @@
-all: readsup decode_base
+all: readsup decode_base string_to_char
 
 clean:
-	rm readsup decode_base *.o
+	rm readsup decode_base string_to_char *.o
 
 readsup: readsup.o subformat.o supformat.o common.o subtitle.o charlist.o \
 		output.o subprop.o bitmap.o charmatch.o util.o
 	gcc -o $@ $^
 
 decode_base: decode_base.o common.o charlist.o bitmap.o subprop.o util.o
+	gcc -o $@ $^
+
+string_to_char: string_to_char.o common.o charlist.o bitmap.o subprop.o util.o
 	gcc -o $@ $^
 
 common.o: common.c common.h
@@ -42,6 +45,9 @@ readsup.o: readsup.c common.h subtitle.h subformat.h supformat.h charlist.h outp
 
 decode_base.o: decode_base.c common.h charlist.h
 	gcc -c -Wall decode_base.c
+
+string_to_char.o: string_to_char.c common.h charlist.h
+	gcc -c -Wall string_to_char.c
 
 util.o: util.c common.h util.h
 	gcc -c -Wall util.c

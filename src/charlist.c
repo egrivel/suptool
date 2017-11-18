@@ -443,6 +443,56 @@ void decode_bits(int nr) {
    }
 }   
 
+unsigned char *decode_string_to_bytes(char *str, int *length) {
+  int inlength = strlen(str);
+  int outbuflength = (inlength / 5) * 8 + 2;
+  unsigned char *outbuf = malloc(outbuflength);
+  memset(outbuf, 0, outbuflength);
+
+  *length = 0;
+  int outbits = 0;
+  
+  while (*str) {
+    int value ;
+    if ((*str >= '0') && (*str <= '9')) {
+      value = *str - '0';
+    } else if ((*str >= 'A') && (*str <= 'Z')) {
+      value = *str - 'A' + 10;
+    } else if ((*str >= 'a') && (*str <= 'z')) {
+      value = *str - 'a' + 36;
+    } else if (*str == '-') {
+      value = 62;
+    } else {
+      value = 63;
+    }
+
+    int value_mask = 0x20;
+    while (value_mask) {
+      outbuf[*length] = 2 * outbuf[*length];
+      if (value & value_mask) {
+	outbuf[*length]++;
+      }
+      outbits++;
+      if (outbits == 8) {
+	(*length)++;
+	outbits = 0;
+	if (*length >= outbuflength) {
+	  printf("Out of memory in decode_string_to_bytes: %d exceeds %d\n", *length, outbuflength);
+	  exit(0);
+	}
+      }
+      value_mask /= 2;
+    }
+    str++;
+  }
+
+  if (outbits != 0) {
+    (*length)++;
+  }
+
+  return outbuf;
+}
+
 void decode_base(char *base) {
    decode_out_count = 0;
    decode_out_value = 0;
@@ -470,6 +520,95 @@ void decode_base(char *base) {
       printf("0x%02x ", decode_out_value);
    }
    printf("\n");
+}
+
+/**
+ * Dump the contents of a buffer (containing the string of bits representing
+ * the character) on standard output.
+ */
+void dump_character_data(unsigned char *buffer, int length) {
+  if (length < 3) {
+    // We need to get at least 3 bytes of data back with height, width and
+    // baseline. If there are fewer than 3 bytes of data in the buffer,
+    // we can't continue.
+    printf("Decoded data is too short (%d, should be at least 4 bytes)\n",
+	   length);
+    exit(0);
+  }
+  
+  int height = buffer[0];
+  int width = buffer[1];
+  int baseline = buffer[2];
+  
+  printf("# Start of character dump baseline %d\n", baseline);
+  printf("# (0, 0) to (%d, %d): %d wide, %d high\n",
+	 width-1, height-1, width, height);
+  
+  // Based on width and height, determine the total number of bits we have
+  // to process, and make sure they are all there in the data
+  int nr_bits = width * height;
+  if (length < (nr_bits + 7) / 8 + 3) {
+    // Not enough bytes in the buffer to accomodate all the bits that make
+    // up the character. Give an error and some debug info.
+    printf("Got %d chars, expecting %d. Decoded string:\n",
+	   length, (nr_bits + 7) / 8 + 3);
+    int i;
+    for (i = 0; i < length; i++) {
+      printf("0x%02X ", buffer[i]);
+    }
+    printf("\n");
+    exit(0);
+  }
+  
+  // Know that the buffer has enough data, start peeling bits off
+  int row = 0;
+  int col = 0;
+  int ptr = 3;
+  unsigned char mask = 0x80;
+  while (nr_bits) {
+    nr_bits--;
+    int bit = buffer[ptr] & mask;
+    if (col == 0) {
+      printf("# %02d: ", row);
+    }
+    if (bit) {
+      printf("X");
+    } else {
+      printf(".");
+    }
+    
+    mask = mask / 2;
+    if (mask == 0) {
+      ptr++;
+      mask = 0x80;
+    }
+    col++;
+    if (col == width) {
+      row++;
+      col = 0;
+      printf("\n");
+      if (row == (baseline + 1)) {
+	printf("------");
+	int j;
+	for (j = 0; j < width; j++) {
+	  printf("-");
+	}
+	printf("\n");
+      }
+    }
+  }
+  
+  if (row <= baseline) {
+    while (row <= baseline) {
+      printf("# %02d:\n", row++);
+    }
+    printf("------");
+    int j;
+    for (j = 0; j < width; j++) {
+      printf("-");
+    }
+    printf("\n");
+  }
 }
 
 char *encode_bitmap_base(Bitmap bm,
