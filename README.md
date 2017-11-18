@@ -116,6 +116,14 @@ character.
  - `void do_postprocess(char *buffer)` does post-processing on a buffer. Note
    that the replacement is in-place, so the input buffer is modified.
 
+### 02. subprop ###
+
+Properties of the current subtitle set.
+
+### 02. subtitle ###
+
+Maintains the concept of all the subtitles in a file.
+
 ### 02. util ###
 
 General utilities
@@ -148,20 +156,16 @@ for dumping a debug version of a bitmap or a string to `stdout`.
  - `void dump_code(char *code)` will print an ASCII graphical representation
    of the character represented by the code on standard output.
 
-### charlist ###
+### 03. output ###
+
+### 03. subformat ###
+
+### 03. supformat ###
+
+### 04. charlist ###
 
 Maintain a list of known characters. Characters are identified by a _code_
 which is arrived at by interpreting the character's bitmap as a bit stream
 and encoding this stream in ASCII by taking chunks of 6 bits. This "code"
 is the standard representation of a character bitmap throughout the system.
-
-### output ###
-
-### subformat ###
-
-### subprop ###
-
-### subtitle ###
-
-### supformat ###
 
