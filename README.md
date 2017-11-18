@@ -58,10 +58,27 @@ to how characters are stored in the `readsup.data` file.
 
 ## Source Code ##
 
-The following describes the different source code modules, in alphabetical
-order.
+The following describes the different source code modules, from the bottom
+up, that is, modules described further down the page only depend on modules
+described earlier.
 
-### bitmap ###
+### 01. common ###
+
+Overall shared functionality. The `common.h` include file defines
+specifically sized integer types, which are important for processing the
+binary subtitle data.
+ - `int_8` is an 8-bit integer
+ - `int_16` is a 16-bit integer
+ - `int_32` is a 32-bit integer
+ - `int_64` is a 64-bit integer
+There are static assertions (using a trick found on google) inserted to make
+sure that these types actually result in the exact right size.
+
+In addition, two functions to do big endian / little endian swaps are defined:
+ - `int_16 swap_int_16(int_16 value)` to swap a 16-bit integer
+ - `int_32 swap_int_32(int_32 value)` to swap a 16-bit integer
+
+### 02. bitmap ###
 
 Defines a structure `Bitmap` and supports operations on it. The bitmap
 structure is how the graphical representation of a character is maintained
@@ -87,14 +104,26 @@ within the system. The following functions are supported:
    requested position. If the coordinates are outside of the bitmap's size,
    `false` is returned.
 
-### charlist ###
+### 02. process ###
 
-Maintain a list of known characters. Characters are identified by a _code_
-which is arrived at by interpreting the character's bitmap as a bit stream
-and encoding this stream in ASCII by taking chunks of 6 bits. This "code"
-is the standard representation of a character bitmap throughout the system.
+Buffer processing functions. These functions allow for combining sequences
+into a single character, e.g. when the `%` character is recognized as three
+partial characters which must be combined back to the single intended
+character.
 
-### charutils ###
+ - `void add_postprocess(char *str, char *replace)` adds a replacement string
+   to the list of post processing operations.
+ - `void do_postprocess(char *buffer)` does post-processing on a buffer. Note
+   that the replacement is in-place, so the input buffer is modified.
+
+### 02. util ###
+
+General utilities
+
+ - `void util_set_threshold(int th)` sets a threshold
+ - `int util_get_threshold()` retrieves the current threshold
+
+### 03. charutils ###
 
 Utilities that operate on a single character.
 Module to convert back-and-forth between a `Bitmap` structure and a
@@ -119,21 +148,12 @@ for dumping a debug version of a bitmap or a string to `stdout`.
  - `void dump_code(char *code)` will print an ASCII graphical representation
    of the character represented by the code on standard output.
 
-### common ###
+### charlist ###
 
-Overall shared functionality. The `common.h` include file defines
-specifically sized integer types, which are important for processing the
-binary subtitle data.
- - `int_8` is an 8-bit integer
- - `int_16` is a 16-bit integer
- - `int_32` is a 32-bit integer
- - `int_64` is a 64-bit integer
-There are static assertions (using a trick found on google) inserted to make
-sure that these types actually result in the exact right size.
-
-In addition, two functions to do big endian / little endian swaps are defined:
- - `int_16 swap_int_16(int_16 value)` to swap a 16-bit integer
- - `int_32 swap_int_32(int_32 value)` to swap a 16-bit integer
+Maintain a list of known characters. Characters are identified by a _code_
+which is arrived at by interpreting the character's bitmap as a bit stream
+and encoding this stream in ASCII by taking chunks of 6 bits. This "code"
+is the standard representation of a character bitmap throughout the system.
 
 ### output ###
 
@@ -145,4 +165,3 @@ In addition, two functions to do big endian / little endian swaps are defined:
 
 ### supformat ###
 
-### util ###

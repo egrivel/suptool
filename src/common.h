@@ -44,4 +44,9 @@ int_32 swap_int_32(int_32 i);
 
 #define UNUSED(e) do { (void)(e); } while(0)
 
+#define STYLE_UNKNOWN  0x00
+#define STYLE_NORMAL   0x01
+#define STYLE_ITALIC   0x02
+#define STYLE_EITHER   0x03
+
 #endif /* _COMMON_INCLUDED */
