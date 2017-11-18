@@ -1430,7 +1430,7 @@ int main(int argc, char *argv[]) {
          }
       }
    } else {
-      printf("Must provide .sup file to process\n");
+      printf("Must provide .sub or .sup file to process\n");
       return 1;
    }
 

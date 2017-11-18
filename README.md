@@ -21,6 +21,25 @@ In the first version, the `readsup` tool is able to
    known letters
  - output, on standard out, a list of letters that are not yet known.
 
+### Command line options ###
+
+ - `-a` results in a `.ass` rather than a `.srt` output file.
+ - `-is <nr>` use <nr> (in pixels) as the minimal space size for italic text.
+   This is used to distinguish letter spacing from word spacing.
+ - `-ns <nr>` use <nr> (in pixels) as the minimal space size for normal text.
+   This is used to distinguish letter spacing from word spacing.
+ - `-ths <nr>` set the threshold for distinguishing between a pixel and
+   background.
+ - `<filename>` the name of the file to process; should be the last command
+   line argument. There must be at least one file, but multiple files must
+   be provided. Note: for the `.idx/.sub` DVD input, the `.sub` file name
+   must be given on the command line.
+
+### Debug options ###
+ - `-b <nr>` provide detailed debug output on block <nr>.
+ - `-d` turn on debugging
+ - `-s <nr>` provide detailed debug output on subtitle <nr>.
+
 The workflow for working with `readsub` is:
  - process a subtitle file
  - capture the standard output with the as-of-yet unknown letters
@@ -158,9 +177,17 @@ for dumping a debug version of a bitmap or a string to `stdout`.
 
 ### 03. output ###
 
+Write to the `.srt` or `.ass` output file.
+
 ### 03. subformat ###
 
+Read and process the DVD `.idx`/`.sub` format binary subtitles. This module
+will use the `subtitle` module to build up the list of subtitles in the file.
+
 ### 03. supformat ###
+
+Read and process the BluRay `.sup` format binary subtitles This module
+will use the `subtitle` module to build up the list of subtitles in the file.
 
 ### 04. charlist ###
 
