@@ -68,13 +68,15 @@ structure is how the graphical representation of a character is maintained
 within the system. The following functions are supported:
  - `Bitmap bitmap_create()` creates a new bitmap (without data) and returns
    a reference to it.
- - `void bitmap_destroy(Bitmap bm)` destroys a bitmap structure and frees u
+ - `void bitmap_destroy(Bitmap bm)` destroys a bitmap structure and frees up
    the memory used by it.
  - `void bitmap_set_width(Bitmap bm, int width)` updates the width of a
-   bitmap. Note that setting bits in the bitmap also implicitly grows the
+   bitmap. This can only be used to grow the bitmap. Existing data is
+   preserverd. Note that setting bits in the bitmap also implicitly grows the
    bitmap.
  - `void bitmap_set_height(Bitmap bm, int height)` updates the height of a
-   bitmap. Note that setting bits in the bitmap also implicitly grows the
+   bitmap. This can only be used to grow the bitmap. Existing data is
+   preserved. Note that setting bits in the bitmap also implicitly grows the
    bitmap.
  - `int bitmap_get_width(Bitmap bm)` returns the current width of the bitmap.
  - `int bitmap_get_height(Bitmap bm)` returns the current height of the bitmap.

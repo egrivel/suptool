@@ -41,7 +41,8 @@ int bitmap_calc_offset(int width, int height, int x, int y) {
    if ((x >= 0) && (x < width) && (y >= 0) && (y < height)) {
       return (width * y) + x;
    }
-   printf("bitmap_calc_offset(%d, %d, %d, %d)\n", width, height, x, y);
+   printf("bitmap_calc_offset(%d, %d, %d, %d): position outside of dimensions\n",
+	  width, height, x, y);
    return 0;
 }
 
