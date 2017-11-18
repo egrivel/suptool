@@ -4,8 +4,8 @@
  * Maintain a bitmap structure
  */
 
-#ifndef BITMAP_INCLUDED
-#define BITMAP_INCLUDED
+#ifndef _BITMAP_INCLUDED
+#define _BITMAP_INCLUDED
 
 // Declare a generic bitmap structure, exposed outside of the module.
 // None of the bitmap structure's internal workings are published.
@@ -42,4 +42,4 @@ Bit bitmap_get_bit(Bitmap bm, int x, int y);
 // Dump the bitmap to stdout
 void bitmap_dump(Bitmap bm);
 
-#endif // BITMAP_INCLUDED
+#endif // _BITMAP_INCLUDED

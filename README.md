@@ -94,6 +94,20 @@ within the system. The following functions are supported:
 
 ### common ###
 
+Overall shared functionality. The `common.h` include file defines
+specifically sized integer types, which are important for processing the
+binary subtitle data.
+ - `int_8` is an 8-bit integer
+ - `int_16` is a 16-bit integer
+ - `int_32` is a 32-bit integer
+ - `int_64` is a 64-bit integer
+There are static assertions (using a trick found on google) inserted to make
+sure that these types actually result in the exact right size.
+
+In addition, two functions to do big endian / little endian swaps are defined:
+ - `int_16 swap_int_16(int_16 value)` to swap a 16-bit integer
+ - `int_32 swap_int_32(int_32 value)` to swap a 16-bit integer
+
 ### output ###
 
 ### subformat ###
