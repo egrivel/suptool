@@ -3,6 +3,7 @@
 #include "supformat.h"
 #include "subformat.h"
 #include "charlist.h"
+#include "charutils.h"
 #include "output.h"
 #include "subprop.h"
 #include "util.h"
@@ -350,25 +351,6 @@ void determine_line_properties(LineSizes *sizes) {
    line_sizes_compute(sizes);
 }
 
-void dump_char(Bitmap bm, int line_start, int line_end, int char_start, int char_end) {
-   int i, j;
-
-   printf("# (%d, %d) to (%d, %d): %d wide, %d high\n",
-          char_start, line_start, char_end, line_end,
-          char_end - char_start + 1, line_end - line_start + 1);
-   for (i = line_start; i <= line_end; i++) {
-      printf("# %02d: ", i);
-      for (j = char_start; j <= char_end; j++) {
-         if (bitmap_get_bit(bm, j, i)) {
-            printf("X");
-         } else {
-            printf(".");
-         }
-      }
-      printf("\n");
-   }
-}
-
 bool find_line_up(Bitmap bm, int block_width, int block_height,
                   int *line, int x, int y, bool debug) {
    if (debug) {
@@ -629,7 +611,6 @@ void process_single_char(Bitmap bm, int block_height, int block_width,
 
    if (base_result == NULL) {
       //printf("# Start of character dump baseline %d (first in %d/%d):\n", baseline, nr_try, gl_cur_subtitle);
-      //dump_char(bm, 0, block_height - 1, 0, block_width - 1);
       if (full_result == NULL) {
          //   printf("%s.ch = \n", base_encode);
          //   printf("%s.style = unknown\n", base_encode);
@@ -673,7 +654,7 @@ void process_single_char(Bitmap bm, int block_height, int block_width,
 
    if (debug || (full_result == NULL)) {
       printf("# Start of character dump baseline %d (first in %s %d/%d):\n", baseline, fname, nr_try, gl_cur_subtitle);
-      dump_char(bm, 0, block_height - 1, 0, block_width - 1);
+      dump_bitmap(bm);
       printf("%s.ch = \n", full_encode);
       printf("%s.style = unknown\n", full_encode);
       add_char(full_encode);
@@ -760,7 +741,7 @@ void process_char(Bitmap bm, int line_start, int line_end, int baseline, int alt
 
    if (debug) {
       printf("Inspect character block %d with baseline %d:\n", nr_try, baseline);
-      dump_char(new_bm, 0, block_height - 1, 0, block_width - 1);
+      dump_bitmap(new_bm);
    }
 
    // Move through the character in the following direction:
@@ -933,7 +914,7 @@ void process_char(Bitmap bm, int line_start, int line_end, int baseline, int alt
       printf("\n");
       printf("Block %d has split character ending at (%d, %d):\n",
              nr_try, last_x, last_y);
-      dump_char(new_bm, 0, (block_height - 1), 0, block_width - 1);
+      dump_bitmap(new_bm);
    }
 
    int *vertical_line = malloc(block_height * sizeof(int));
@@ -994,9 +975,9 @@ void process_char(Bitmap bm, int line_start, int line_end, int baseline, int alt
          
          if (debug) {
             printf("Got new block:\n");
-            dump_char(temp_bm, 0, (block_height - 1), 0, new_width - 1);
+	    dump_bitmap(temp_bm);
             printf("Old block has become:\n");
-            dump_char(new_bm, 0, (block_height - 1), 0, (block_width - 1));
+	    dump_bitmap(new_bm);
          }
          
          // Process the first new character
@@ -1232,7 +1213,8 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
          printf("      base=%d, asc=%d, desc=%d, alt_base1=%d, alt_base2=%d\n",
                 sizes->base_height, sizes->ascender_height, sizes->descender_height, 
                 alt_base1, alt_base2);
-         dump_char(subtitle_bitmap(sbt), line_start, line_end, 0, subtitle_get_width(sbt));
+	 dump_bitmap(subtitle_bitmap(sbt));
+         // dump_char(subtitle_bitmap(sbt), line_start, line_end, 0, subtitle_get_width(sbt));
       }
 
       parse_line(sbt, line_start, line_end, base, alt_base1, alt_base2, nr, fname);

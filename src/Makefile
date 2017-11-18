@@ -4,7 +4,7 @@ clean:
 	rm readsup decode_base string_to_char *.o
 
 readsup: readsup.o subformat.o supformat.o common.o subtitle.o charlist.o \
-		output.o subprop.o bitmap.o charmatch.o util.o
+		output.o subprop.o bitmap.o charutils.o util.o
 	gcc -o $@ $^
 
 decode_base: decode_base.o common.o charlist.o bitmap.o subprop.o util.o
@@ -37,8 +37,8 @@ subprop.o: subprop.c common.h subprop.h
 bitmap.o: bitmap.c common.h bitmap.h
 	gcc -c -Wall bitmap.c
 
-charmatch.o: charmatch.c common.h charmatch.h bitmap.h
-	gcc -c -Wall charmatch.c
+charutils.o: charutils.c common.h charutils.h bitmap.h
+	gcc -c -Wall charutils.c
 
 readsup.o: readsup.c common.h subtitle.h subformat.h supformat.h charlist.h output.h subprop.h
 	gcc -c -Wall readsup.c

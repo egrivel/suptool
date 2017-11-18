@@ -39,7 +39,4 @@ void bitmap_set_bit(Bitmap bm, int x, int y, Bit bit);
 // returned.
 Bit bitmap_get_bit(Bitmap bm, int x, int y);
 
-// Dump the bitmap to stdout
-void bitmap_dump(Bitmap bm);
-
 #endif // _BITMAP_INCLUDED

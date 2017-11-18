@@ -86,11 +86,20 @@ within the system. The following functions are supported:
  - `bool bitmap_get_bit(Bitmap bm, int x, int y)` returns the bit at the
    requested position. If the coordinates are outside of the bitmap's size,
    `false` is returned.
- - `void bitmap_dump(Bitmap bm)` dumps the bitmap on `stdout`
 
 ### charlist ###
 
-### charmatch ###
+### charutils ###
+
+Utilities that operate on a single character.
+Module to convert back-and-forth between a `Bitmap` structure and a
+compressed string representing a single character. It also provides support
+for dumping a debug version of a bitmap or a string to `stdout`.
+
+ - `char *bitmap_to_string(Bitmap bm)`
+ - `Bitmap string_to_bitmap(char *string)`
+ - `void dump_bitmap(Bitmap bm)`
+ - `void dump_string(char *string)`
 
 ### common ###
 

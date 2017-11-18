@@ -115,6 +115,7 @@ int get_numeric_value(char *str) {
    return value;
 }
 
+// Get the item, adding it first if it isn't there yet
 CharItem *get_add_item(char *str) {
    CharItem *item = get_char_item(str);
    if (item == NULL) {

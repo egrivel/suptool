@@ -149,22 +149,3 @@ Bit bitmap_get_bit(Bitmap bm, int x, int y) {
    }
    return false;
 }
-
-void bitmap_dump(Bitmap bm) {
-   if (bm != NULL) {
-      int width = bm->width;
-      int height = bm->height;
-      printf("# bitmap dump (%d x %d)\n", width, height);
-      if ((width > 0) && (height > 0)) {
-         int y = 0;
-         char *data = malloc(width + 1);
-         memset(data, 0, width + 1);
-         for (y = 0; y < height; y++) {
-            int offset = bitmap_calc_offset(width, height, 0, y);
-            memcpy(data, bm->data + offset, width);
-            printf("# %s\n", data);
-         }
-         free(data);
-      }
-   }
-}
