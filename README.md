@@ -29,3 +29,47 @@ The workflow for working with `readsub` is:
 
 Work is ongoing to make `readsup` guess for characters that it doesn't know
 yet.
+
+## decode_base tool ##
+
+Decode a "compressed" string to hexadecimal. Usage:
+```
+./decode_base <character string>
+```
+The output will be a series of hexadecimal numbers that are the decoded bytes
+from the input string.
+
+## string_to_char tool ##
+
+Parse a "compressed" string and output the character representation. Usage:
+```
+./string_to_char <character string>
+```
+The output will be an ASCII bitmap representation of the character, similar
+to how characters are stored in the `readsup.data` file.
+
+---
+
+## Source Code ##
+
+The following describes the different source code modules.
+
+### bitmap ###
+
+### charlist ###
+
+### charmatch ###
+
+### common ###
+
+### output ###
+
+### subformat ###
+
+### subprop ###
+
+### subtitle ###
+
+### supformat ###
+
+### util ###
