@@ -4,6 +4,7 @@ testdata
 SubToSup
 readsup
 decode_base
+string_to_char
 *.o
 *~
 *.mkv
