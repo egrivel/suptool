@@ -103,8 +103,14 @@ for dumping a debug version of a bitmap or a string to `stdout`.
 
  - `char *bitmap_to_code(Bitmap bm)`
  - `Bitmap code_to_bitmap(char *code)`
- - `void dump_bitmap(Bitmap bm)`
- - `void dump_code(char *code)`
+ - `unsigned char *code_to_bytes(char *code, int *length)` returns the byte
+   stream represented by the code, and sets the length of the byte stream in
+   the location pointed to by `length`. The caller is responsible for releasing
+   the memory of the byte stream (`free()`) when done.
+ - `void dump_bitmap(Bitmap bm)` will print an ASCII graphical representation
+   of the bitmap on standard output.
+ - `void dump_code(char *code)` will print an ASCII graphical representation
+   of the character represented by the code on standard output.
 
 ### common ###
 

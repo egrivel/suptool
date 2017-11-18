@@ -1,5 +1,5 @@
 #include "common.h"
-#include "charlist.h"
+#include "charutils.h"
 
 void help();
 
@@ -10,10 +10,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
   for (i = 1; i < argc; i++) {
-    int length;
-    unsigned char *buffer = decode_string_to_bytes(argv[i], &length);
-    dump_character_data(buffer, length);
-    free(buffer);
+    dump_code(argv[i]);
   }
 
   return 0;

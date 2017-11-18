@@ -27,6 +27,5 @@ char *encode_bitmap_base(Bitmap bm,
 void decode_base(char *code);
 char *do_postprocess(char *str);
 unsigned char *decode_string_to_bytes(char *str, int *length);
-void dump_character_data(unsigned char *buffer, int length);
 
 #endif /* _CHARLIST_INCLUDED */

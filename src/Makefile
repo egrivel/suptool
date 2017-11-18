@@ -7,10 +7,10 @@ readsup: readsup.o subformat.o supformat.o common.o subtitle.o charlist.o \
 		output.o subprop.o bitmap.o charutils.o util.o
 	gcc -o $@ $^
 
-decode_base: decode_base.o common.o charlist.o bitmap.o subprop.o util.o
+decode_base: decode_base.o common.o charutils.o bitmap.o subprop.o util.o
 	gcc -o $@ $^
 
-string_to_char: string_to_char.o common.o charlist.o bitmap.o subprop.o util.o
+string_to_char: string_to_char.o common.o charutils.o bitmap.o subprop.o util.o
 	gcc -o $@ $^
 
 common.o: common.c common.h
@@ -43,7 +43,7 @@ charutils.o: charutils.c common.h charutils.h bitmap.h
 readsup.o: readsup.c common.h subtitle.h subformat.h supformat.h charlist.h output.h subprop.h
 	gcc -c -Wall readsup.c
 
-decode_base.o: decode_base.c common.h charlist.h
+decode_base.o: decode_base.c common.h charutils.h
 	gcc -c -Wall decode_base.c
 
 string_to_char.o: string_to_char.c common.h charlist.h

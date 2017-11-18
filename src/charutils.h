@@ -4,9 +4,10 @@
 #include "common.h"
 #include "bitmap.h"
 
-char *bitmap_to_string(Bitmap bm);
-Bitmap string_to_bitmap(char *string);
+char *bitmap_to_code(Bitmap bm);
+Bitmap code_to_bitmap(char *code);
+unsigned char *code_to_bytes(char *code, int *length);
 void dump_bitmap(Bitmap bm);
-void dump_string(char *string);
+void dump_code(char *code);
 
 #endif /* _CHARMATCH_DEFINED */
