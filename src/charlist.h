@@ -16,10 +16,6 @@ void read_char_data(char *fname);
 int charlist_get_style(char *code);
 char *charlist_get_style_name(char *code);
 void charlist_set_style(char *code, int style);
-char *encode_bitmap(Bitmap bm,
-                    int line_start, int line_end,
-                    int char_start, int char_end,
-                    int baseline);
 char *encode_bitmap_base(Bitmap bm,
                          int line_start, int line_end,
                          int char_start, int char_end,

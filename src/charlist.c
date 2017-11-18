@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "charlist.h"
+#include "charutils.h"
 #include "subprop.h"
 #include "bitmap.h"
 #include "util.h"
@@ -275,109 +276,6 @@ void read_char_data(char *fname) {
    */
 }
 
-char *get_encoded(unsigned char *data, int nr_bytes) {
-   char *string = malloc(2 * nr_bytes + 1);
-
-   int i = 0;
-   int offset = 0;
-   int mask = 0x80;
-   int single_value = 0;
-   int nr_bits = 0;
-   while (offset < nr_bytes) {
-      single_value = 2 * single_value;
-      if (data[offset] & mask) {
-         single_value++;
-      }
-      nr_bits++;
-      if (nr_bits > 5) {
-         if (single_value < 10) {
-            single_value += '0';
-         } else if (single_value < 36) {
-            single_value += 'A' - 10;
-         } else if (single_value < 62) {
-            single_value += 'a' - 36;
-         } else if (single_value == 62) {
-            single_value = '-';
-         } else {
-            single_value = '_';
-         }
-         string[i++] = single_value;
-         single_value = 0;
-         nr_bits = 0;
-      }
-      mask = mask / 2;
-      if (mask == 0) {
-         offset++;
-         mask = 0x80;
-      }
-   }
-   if (nr_bits > 0) {
-      if (single_value < 10) {
-         single_value += '0';
-      } else if (single_value < 36) {
-         single_value += 'A' - 10;
-      } else if (single_value < 62) {
-         single_value += 'a' - 36;
-      } else if (single_value == 62) {
-         single_value = '-';
-      } else {
-         single_value = '_';
-      }
-      string[i++] = single_value;
-   }
-   string[i++] = '\0';
-   return string;
-}
-
-char *encode_bitmap(Bitmap bm,
-                    int line_start, int line_end,
-                    int char_start, int char_end,
-                    int baseline) {
-   int i, j;
-   int nr_bits = (line_end - line_start + 1) * (char_end - char_start + 1);
-   int nr_bytes = (nr_bits + 7) / 8;
-   unsigned char *char_data = malloc(nr_bytes + 3);
-   memset(char_data, 0, nr_bytes + 3);
-   char_data[0] = line_end - line_start + 1;
-   char_data[1] = char_end - char_start + 1;
-   char_data[2] = baseline - line_start;
-   int offset = 3;
-   unsigned char mask = 0x80;
-   for (i = line_start; i <= line_end; i++) {
-      for (j = char_start; j <= char_end; j++) {
-         if (bitmap_get_bit(bm, j, i)) {
-            char_data[offset] |= mask;
-         }
-         mask = mask / 2;
-         if (mask == 0) {
-            offset++;
-            mask = 0x80;
-         }
-      }
-   }
-   char *encoded = get_encoded(char_data, nr_bytes + 3);
-   free(char_data);
-
-   /*
-   CharItem *item = get_char_item(encoded);
-   if (item != NULL) {
-      char *base_code = encode_bitmap_base(data, line_start, line_end, char_start, char_end, baseline);
-      CharItem *base_item = get_char_item(base_code);
-      if (base_item == NULL) {
-         add_char(base_code);
-         base_item = get_char_item(base_code);
-         base_item->string = strdup(item->string);
-         base_item->style = item->style;
-      }
-      if (strcmp(item->string, base_item->string)) {
-         printf("Base code %s can be '%s' and '%s'\n",
-                base_code, item->string, base_item->string);
-      }
-   }
-   */
-   return encoded;
-}
-
 #define INIT_SIZE 16
 struct bit_data {
    unsigned char *data;
@@ -417,7 +315,7 @@ void add_bit(struct bit_data *data, int bit) {
 
 char *get_encoded_from_struct(struct bit_data *data) {
    if (data->offset) {
-      data->encoded = get_encoded(data->data, data->offset + 1);
+      data->encoded = bytes_to_code(data->data, data->offset + 1);
    } else {
       data->encoded = strdup("");
    }

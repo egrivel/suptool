@@ -25,7 +25,7 @@ subformat.o: subformat.c common.h subtitle.h subformat.h
 supformat.o: supformat.c common.h subtitle.h supformat.h
 	gcc -c -Wall supformat.c
 
-charlist.o: charlist.c common.h charlist.h subprop.h
+charlist.o: charlist.c common.h charlist.h charutils.h subprop.h
 	gcc -c -Wall charlist.c
 
 output.o: output.c common.h output.h

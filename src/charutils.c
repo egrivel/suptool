@@ -10,6 +10,60 @@
 
 /* public functions */
 
+char *bytes_to_code(unsigned char *data, int nr_bytes) {
+   char *string = malloc(2 * nr_bytes + 1);
+
+   int i = 0;
+   int offset = 0;
+   int mask = 0x80;
+   int single_value = 0;
+   int nr_bits = 0;
+   while (offset < nr_bytes) {
+      single_value = 2 * single_value;
+      if (data[offset] & mask) {
+         single_value++;
+      }
+      nr_bits++;
+      if (nr_bits > 5) {
+         if (single_value < 10) {
+            single_value += '0';
+         } else if (single_value < 36) {
+            single_value += 'A' - 10;
+         } else if (single_value < 62) {
+            single_value += 'a' - 36;
+         } else if (single_value == 62) {
+            single_value = '-';
+         } else {
+            single_value = '_';
+         }
+         string[i++] = single_value;
+         single_value = 0;
+         nr_bits = 0;
+      }
+      mask = mask / 2;
+      if (mask == 0) {
+         offset++;
+         mask = 0x80;
+      }
+   }
+   if (nr_bits > 0) {
+      if (single_value < 10) {
+         single_value += '0';
+      } else if (single_value < 36) {
+         single_value += 'A' - 10;
+      } else if (single_value < 62) {
+         single_value += 'a' - 36;
+      } else if (single_value == 62) {
+         single_value = '-';
+      } else {
+         single_value = '_';
+      }
+      string[i++] = single_value;
+   }
+   string[i++] = '\0';
+   return string;
+}
+
 unsigned char *code_to_bytes(char *code, int *length) {
   int inlength = strlen(code);
   int outbuflength = (inlength / 5) * 8 + 2;
@@ -60,12 +114,78 @@ unsigned char *code_to_bytes(char *code, int *length) {
   return outbuf;
 }
 
-char *bitmap_to_code(Bitmap bm) {
-  return NULL;
+char *bitmap_to_code(Bitmap bm, int baseline) {
+   int i, j;
+   int height = bitmap_get_height(bm);
+   int width = bitmap_get_width(bm);
+   int nr_bits = height * width;
+   int nr_bytes = (nr_bits + 7) / 8;
+
+   unsigned char *byte_data = malloc(nr_bytes + 3);
+   memset(byte_data, 0, nr_bytes + 3);
+
+   byte_data[0] = height;
+   byte_data[1] = width;
+   byte_data[2] = baseline;
+
+   int offset = 3;
+   unsigned char mask = 0x80;
+   for (i = 0; i < height; i++) {
+      for (j = 0; j < width; j++) {
+         if (bitmap_get_bit(bm, j, i)) {
+            byte_data[offset] |= mask;
+         }
+         mask = mask / 2;
+         if (mask == 0) {
+            offset++;
+            mask = 0x80;
+         }
+      }
+   }
+
+   char *code = bytes_to_code(byte_data, nr_bytes + 3);
+   free(byte_data);
+
+   return code;
 }
 
-Bitmap code_to_bitmap(char *string) {
-  return NULL;
+Bitmap code_to_bitmap(char *code) {
+  int length;
+  unsigned char *bytes = code_to_bytes(code, &length);
+
+  int width = bytes[0];
+  int height = bytes[1];
+
+  Bitmap bm = bitmap_create();
+  bitmap_set_width(bm, width);
+  bitmap_set_height(bm, height);
+
+  int nr_bits = width * height;
+  int mask = 0x80;
+  int byte_ptr = 3;
+
+  int x = 0;
+  int y = 0;
+  while (nr_bits) {
+    bool bit = bytes[byte_ptr] & mask;
+    bitmap_set_bit(bm, x, y, bit);
+ 
+    x++;
+    if (x >= width) {
+      y++;
+      x = 0;
+    }
+
+    mask = mask / 2;
+    if (mask == 0) {
+      byte_ptr++;
+      mask = 0x80;
+    }
+
+    nr_bits--;
+  }
+  
+  return bm;
 }
 
 void dump_bitmap(Bitmap bm) {

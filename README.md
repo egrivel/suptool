@@ -101,12 +101,19 @@ Module to convert back-and-forth between a `Bitmap` structure and a
 compressed string representing a single character. It also provides support
 for dumping a debug version of a bitmap or a string to `stdout`.
 
- - `char *bitmap_to_code(Bitmap bm)`
- - `Bitmap code_to_bitmap(char *code)`
+ - `char *bytes_to_code(unsigned char *bytes, int length)` returns the
+   ASCII encode representation of the byte stream.
  - `unsigned char *code_to_bytes(char *code, int *length)` returns the byte
    stream represented by the code, and sets the length of the byte stream in
    the location pointed to by `length`. The caller is responsible for releasing
    the memory of the byte stream (`free()`) when done.
+
+ - `char *bitmap_to_code(Bitmap bm, int baseline)` returns the code string for
+   the bitmap. The caller is responsible for releasing the memory for the
+   code string.
+ - `Bitmap code_to_bitmap(char *code)` returns the bitmap for the code. The
+   caller is responsible for destroying the bitmap when done.
+
  - `void dump_bitmap(Bitmap bm)` will print an ASCII graphical representation
    of the bitmap on standard output.
  - `void dump_code(char *code)` will print an ASCII graphical representation
