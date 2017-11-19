@@ -292,6 +292,27 @@ int get_bitmap_row_from_image_row(int nr, int baseline) {
   return (baseline - nr);
 }
 
+bool get_aggregate_bit(Bitmap bm, int col, int row) {
+  int height = bitmap_get_height(bm);
+  int width = bitmap_get_width(bm);
+
+  int i, j;
+  int bits = 0;
+  int bit_count = 0;
+  for (i = (row - 1); i <= (row + 1); i++) {
+    for (j = (col - 1); j <= (col + 1); j++) {
+      if ((i >= 0) && (i < height) && (j >= 0) && (j < width)) {
+	if (bitmap_get_bit(bm, j, i)) {
+	  bits++;
+	}
+	bit_count++;
+      }
+    }
+  }
+
+  return (bits > (bit_count / 3));
+}
+
 // Create a new bitmap out of an existing one, reduced to "minimal"
 // size
 Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
@@ -322,7 +343,7 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
 	int bm_col = x_fraction * (x_width - 1);
 	if ((bm_col >= 0) && (bm_col < width)) {
 	  bitmap_set_bit(minimal_bm, col, row,
-			 bitmap_get_bit(bm, bm_col, bm_row));;
+			 get_aggregate_bit(bm, bm_col, bm_row));
 	}
 	col++;
       }
