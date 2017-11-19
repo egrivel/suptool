@@ -6,10 +6,6 @@
 #include "bitmap.h"
 #include "charutils.h"
 
-/* private functions */
-
-/* public functions */
-
 char *bytes_to_code(unsigned char *data, int nr_bytes) {
    char *string = malloc(2 * nr_bytes + 1);
 
@@ -47,18 +43,22 @@ char *bytes_to_code(unsigned char *data, int nr_bytes) {
       }
    }
    if (nr_bits > 0) {
-      if (single_value < 10) {
-         single_value += '0';
-      } else if (single_value < 36) {
-         single_value += 'A' - 10;
-      } else if (single_value < 62) {
-         single_value += 'a' - 36;
-      } else if (single_value == 62) {
-         single_value = '-';
-      } else {
-         single_value = '_';
-      }
-      string[i++] = single_value;
+     while (nr_bits <= 5) {
+       single_value *= 2;
+       nr_bits++;
+     }
+     if (single_value < 10) {
+       single_value += '0';
+     } else if (single_value < 36) {
+       single_value += 'A' - 10;
+     } else if (single_value < 62) {
+       single_value += 'a' - 36;
+     } else if (single_value == 62) {
+       single_value = '-';
+     } else {
+       single_value = '_';
+     }
+     string[i++] = single_value;
    }
    string[i++] = '\0';
    return string;
@@ -153,8 +153,8 @@ Bitmap code_to_bitmap(char *code) {
   int length;
   unsigned char *bytes = code_to_bytes(code, &length);
 
-  int width = bytes[0];
-  int height = bytes[1];
+  int width = bytes[1];
+  int height = bytes[0];
 
   Bitmap bm = bitmap_create();
   bitmap_set_width(bm, width);
@@ -197,13 +197,142 @@ int code_to_baseline(char *code) {
   return baseline;
 }
 
+int code_to_width(char *code) {
+  int length;
+  unsigned char *bytes = code_to_bytes(code, &length);
+
+  int width = bytes[1];
+  free(bytes);
+  return width;
+}
+
+int code_to_height(char *code) {
+  int length;
+  unsigned char *bytes = code_to_bytes(code, &length);
+
+  int height = bytes[0];
+  free(bytes);
+  return height;
+}
+
+// The following rows make up the "minimal" image map:
+//  1. Image row (x_height * 2.00) is fifth ascender 
+//  2. Image row (x_height * 1.75) is fourth ascender 
+//  3. Image row (x_height * 1.50) is third ascender 
+//  4. Image row (x_height * 1.25) is second ascender
+//  5. Image row (x_height + 1) is first ascender
+//
+//  6. Image row (x_height - 1) is top body row
+//  7. Image row (x_height * 0.75) is next body row
+//  8. Image row (x_height * 0.50) is next body row
+//  9. Image row (x_height * 0.25) is next body row
+// 10. Image row 0 is bottom body row
+//
+// 11. Image row (-2) is first descender
+// 12. Image row (-x_height * 0.25) is second descender
+// 13. Image row (-x_height * 0.50) is third descender
+// 14. Image row (-x_height * 0.75) is fourth descender
+// 15. Image row (-x_height * 1.00) is fifth descender
+// This function returns, for minimal image row (nr), what the
+// image row is to fill the minimal image from.
+int get_image_row_from_minimal_row(int nr, int x_height) {
+  switch (nr) {
+  case 1: return x_height * 2;
+  case 2: return x_height * 1.75;
+  case 3: return x_height * 1.5;
+  case 4: return x_height * 1.25;
+  case 5: return x_height + 1;
+  case 6: return x_height - 1;
+  case 7: return x_height * 0.75;
+  case 8: return x_height * 0.5;
+  case 9: return x_height * 0.25;
+  case 10: return 0;
+  case 11: return -2;
+  case 12: return -(x_height * 0.25);
+  case 13: return -(x_height * 0.5);
+  case 14: return -(x_height * 0.75);
+  case 15: return -(x_height);
+  }
+  return 0;
+}
+
+// Assuming the image has row 0 as the baseline row and row number
+// above that are positive, row numbers below that are negative.
+//
+// if (height-1) equal to baseline, 
+//  - bitmap row 0 is image row heigth-1
+//  - bitmap row 1 is image row height-2
+//  - bitmap row n is image row (height-n-1)
+//  - bitmap row (height-1) is image row 0
+//
+// if (height-1) is (baseline-3), then the image floats above the baseline
+//  - bitmap row 0 is image row height+3-1
+//  - bitmap row 1 is image row height+3-2
+//  - bitmap row n is image row height+3-n-1
+//  - bitmap row (height-1) is image row height+3-height+1-1 = 3
+//
+// If (height-1) is (baseline+4), then the image has descenders
+//  - bitmap row 0 is image row height-4-1
+//  - bitmap row 1 is image row height-4-2
+//  - bitmap row n is image row height-4-n-1
+//  - bitmap row (height-1) is image row height-4-height+1-1 = -4
+//
+// In general,
+//  - bitmap row n is image row
+//       height - (height-1-baseline) - n - 1
+//     = height - height + 1 + baseline - n - 1
+//     = 1 + baseline - n - 1
+//     = baseline - n
+// or conversely,
+//   image row m = bitmap row (baseline - m)
+//
+// so rows 0 through (height-1) in the bitmap translate to rows
+// (baseline) through (baseline - height + 1) in the image
+int get_bitmap_row_from_image_row(int nr, int baseline) {
+  return (baseline - nr);
+}
+
 // Create a new bitmap out of an existing one, reduced to "minimal"
 // size
-/*
 Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
+  Bitmap minimal_bm = bitmap_create();
+
+  int width = bitmap_get_width(bm);
+  int height = bitmap_get_height(bm);
   
+  // The minimal bitmap would sample the letter "x" as a 5x5 pattern.
+  // So use as horizontal sampling:
+  //  - column 0 * (x_width - 1)
+  //  - column 0.25 * (x_width - 1)
+  //  - column 0.50 * (x_width - 1)
+  //  - column 0.75 * (x_width - 1)
+  //  - column 1.00 * (x_width - 1);
+
+  int row = 0;
+  float x_fraction;
+  int i;
+  for (i = 1; i <= 15; i++) {
+    int image_row = get_image_row_from_minimal_row(i, x_height);
+    int bm_row = get_bitmap_row_from_image_row(image_row, baseline);
+    if ((bm_row < height) && (bm_row >= 0)) {
+      // bitmap row falls within the bitmap, so include it in the
+      // minimal bitmap as (row)
+      int col = 0;
+      for (x_fraction = 0.0; (x_fraction * (x_width - 1)) < width; x_fraction += 0.25) {
+	int bm_col = x_fraction * (x_width - 1);
+	if ((bm_col >= 0) && (bm_col < width)) {
+	  bitmap_set_bit(minimal_bm, col, row,
+			 bitmap_get_bit(bm, bm_col, bm_row));;
+	}
+	col++;
+      }
+      row++;
+    }
+  }
+
+  return minimal_bm;
 }
-*/
+
 void dump_bitmap(Bitmap bm) {
   if (bm != NULL) {
     int width = bitmap_get_width(bm);
