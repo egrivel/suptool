@@ -15,7 +15,9 @@ char *encode_bitmap_base(Bitmap bm,
                          int line_start, int line_end,
                          int char_start, int char_end,
                          int baseline);
-void decode_base(char *code);
-unsigned char *decode_string_to_bytes(char *str, int *length);
+
+char *charlist_find_by_string(char *string, int style);
+int charlist_nr_entries();
+char *charlist_get_code(int nr);
 
 #endif /* _CHARLIST_INCLUDED */

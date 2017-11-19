@@ -9,6 +9,9 @@ unsigned char *code_to_bytes(char *code, int *length);
 
 char *bitmap_to_code(Bitmap bm, int baseline);
 Bitmap code_to_bitmap(char *code);
+int code_to_baseline(char *code);
+
+Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height);
 
 void dump_bitmap(Bitmap bm);
 void dump_code(char *code);

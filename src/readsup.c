@@ -570,7 +570,7 @@ void process_single_char(Bitmap bm, int block_height, int block_width,
 
    char *full_encode = NULL;
    for (i = 0; i < nr_bases; i++) {
-      full_encode = bytes_to_code(bm, bases[i]);
+      full_encode = bitmap_to_code(bm, bases[i]);
       if (has_char(full_encode)) {
          // found a match
          break;
@@ -581,7 +581,7 @@ void process_single_char(Bitmap bm, int block_height, int block_width,
    }
    if (full_encode == NULL) {
       // None found, revert to regular baseline
-      full_encode = bytes_to_code(bm, baseline);
+      full_encode = bitmap_to_code(bm, baseline);
    }
 
    char *base_result = NULL;

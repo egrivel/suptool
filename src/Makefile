@@ -1,4 +1,4 @@
-all: readsup decode_base string_to_char
+all: readsup decode_base string_to_char learn
 
 clean:
 	rm readsup decode_base string_to_char *.o
@@ -11,6 +11,9 @@ decode_base: decode_base.o common.o charutils.o bitmap.o subprop.o util.o
 	gcc -o $@ $^
 
 string_to_char: string_to_char.o common.o charutils.o bitmap.o subprop.o util.o
+	gcc -o $@ $^
+
+learn: learn.o common.o charlist.o charutils.o subprop.o bitmap.o util.o process.o
 	gcc -o $@ $^
 
 common.o: common.c common.h
@@ -54,3 +57,7 @@ string_to_char.o: string_to_char.c common.h charlist.h
 
 util.o: util.c common.h util.h
 	gcc -c -Wall util.c
+
+learn.o: learn.c common.h charlist.h
+	gcc -c -Wall learn.c
+

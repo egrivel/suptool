@@ -4,7 +4,6 @@
 int main(int argc, char *argv[]) {
    int i;
    for (i = 1; i < argc; i++) {
-     // decode_base(argv[i]);
      int length;
      unsigned char *outbuf = code_to_bytes(argv[i], &length);
      int j;

@@ -4,7 +4,9 @@ testdata
 SubToSup
 readsup
 decode_base
+learn
 string_to_char
+readsup.data
 *.o
 *~
 *.mkv

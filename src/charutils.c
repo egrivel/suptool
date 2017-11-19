@@ -188,6 +188,22 @@ Bitmap code_to_bitmap(char *code) {
   return bm;
 }
 
+int code_to_baseline(char *code) {
+  int length;
+  unsigned char *bytes = code_to_bytes(code, &length);
+
+  int baseline = bytes[2];
+  free(bytes);
+  return baseline;
+}
+
+// Create a new bitmap out of an existing one, reduced to "minimal"
+// size
+/*
+Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
+  
+}
+*/
 void dump_bitmap(Bitmap bm) {
   if (bm != NULL) {
     int width = bitmap_get_width(bm);

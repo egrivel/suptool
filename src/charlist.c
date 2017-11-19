@@ -304,35 +304,6 @@ void decode_bits(int nr) {
    }
 }   
 
-void decode_base(char *base) {
-   decode_out_count = 0;
-   decode_out_value = 0;
-
-   while (*base) {
-      if ((*base >= '0') && (*base <= '9')) {
-         decode_bits(*base - '0');
-      } else if ((*base >= 'A') && (*base <= 'Z')) {
-         decode_bits(*base - 'A' + 10);
-      } else if ((*base >= 'a') && (*base <= 'z')) {
-         decode_bits(*base - 'a' + 36);
-      } else if (*base == '-') {
-         decode_bits(62);
-      } else {
-         decode_bits(63);
-      }
-      base++;
-   }
-   
-   if (decode_out_count) {
-      while (decode_out_count < 8) {
-         decode_out_value *= 2;
-         decode_out_count++;
-      }
-      printf("0x%02x ", decode_out_value);
-   }
-   printf("\n");
-}
-
 char *encode_bitmap_base(Bitmap bm,
                          int line_start, int line_end,
                          int char_start, int char_end,
@@ -747,3 +718,23 @@ char *encode_bitmap_base(Bitmap bm,
    return encoded;
 }
 
+char *charlist_find_by_string(char *string, int style) {
+  int i;
+  for (i = 0; i < nr_chars; i++) {
+    if ((charlist[i].style == style) && !strcmp(charlist[i].string, string)) {
+      return charlist[i].code;
+    }
+  }
+  return NULL;
+}
+
+int charlist_nr_entries() {
+  return nr_chars;
+}
+
+char *charlist_get_code(int nr) {
+  if ((nr >= 0) && (nr < nr_chars)) {
+    return charlist[nr].code;
+  }
+  return NULL;
+}
