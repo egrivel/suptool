@@ -39,6 +39,49 @@ typedef struct {
 
 } LineSizes;
 
+#define MAX_WIDTH 100
+int widths[MAX_WIDTH];
+
+void init_widths() {
+  int i;;
+  for (i = 0; i < MAX_WIDTH; i++) {
+    widths[i] = 0;
+  }
+}
+
+void set_width(int w) {
+  if ((w > 0) && (w < MAX_WIDTH)) {
+    widths[w]++;
+  }
+}
+
+void five_most_frequent_widths() {
+  int freq[5];
+
+  int i, j;
+  for (i = 0; i < 5; i++) {
+    int max = 0;
+    for (j = 0; j < MAX_WIDTH; j++) {
+      int k;
+      bool skip = false;
+      for (k = 0; k < i; k++) {
+	if (freq[k] == j) {
+	  skip = true;
+	}
+      }
+      if (!skip && widths[j] >= widths[max]) {
+	max = j;
+      }
+    }
+    freq[i] = max;
+  }
+
+  printf("# Five most frequent widths in the file:\n");
+  for (i = 0; i < 5; i++) {
+    printf("# width %d occurs %d times\n", freq[i], widths[freq[i]]);
+  }
+}
+
 void line_sizes_add_single(int **data, int **count, int *nr_items, int value) {
    int i;
    for (i = 0; i < (*nr_items); i++) {
@@ -526,6 +569,8 @@ void remember_guess(char *text, bool style) {
 void process_single_char(Bitmap bm, int block_height, int block_width,
                          int baseline, int alt_base1, int alt_base2,
                          int nr_try, char *fname, bool debug) {
+  set_width(block_width);
+
    int bases[15];
    bases[0] = baseline;
    bases[1] = baseline + 1;
@@ -1302,6 +1347,8 @@ int main(int argc, char *argv[]) {
    gl_debug_block = -1;
    gl_debug = false;
 
+   init_widths();
+
    // Arguments:
    //  -a           output .ass rather than .srt
    //  -b <nr>      debug block number <nr>
@@ -1433,6 +1480,8 @@ int main(int argc, char *argv[]) {
       printf("Must provide .sub or .sup file to process\n");
       return 1;
    }
+
+   five_most_frequent_widths();
 
    return 0;
 }

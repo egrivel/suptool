@@ -304,8 +304,20 @@ bool get_aggregate_bit(Bitmap bm, int col, int row) {
       if ((i >= 0) && (i < height) && (j >= 0) && (j < width)) {
 	if (bitmap_get_bit(bm, j, i)) {
 	  bits++;
+	  if (i == row) {
+	    bits++;
+	  }
+	  if (j == col) {
+	    bits++;
+	  }
 	}
 	bit_count++;
+	if (i == row) {
+	  bit_count++;
+	}
+	if (j == col) {
+	  bit_count++;
+	}
       }
     }
   }
@@ -313,13 +325,26 @@ bool get_aggregate_bit(Bitmap bm, int col, int row) {
   return (bits > (bit_count / 3));
 }
 
-// Create a new bitmap out of an existing one, reduced to "minimal"
-// size
+/**
+ * Create a new bitmap out of an existing one, reduced to "minimal"
+ * size
+ * @param bm: Bitmap to convert.
+ * @param baseline: row inside (or outside) the [bm] bitmap that is considered
+ *   the baseline for the font.
+ * @param x_width: most common width in the font (width of "x" character)
+ * @param x_height: height of the base part of the font (height of the "x"
+ *   character).
+ * @return Bitmap with a minimized version of the character.
+ */
 Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   Bitmap minimal_bm = bitmap_create();
 
   int width = bitmap_get_width(bm);
   int height = bitmap_get_height(bm);
+
+  printf("Creating minimal bitmap\n");
+  printf("  baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
+  printf("  width=%d, height=%d\n", width, height);
   
   // The minimal bitmap would sample the letter "x" as a 5x5 pattern.
   // So use as horizontal sampling:
@@ -329,6 +354,30 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   //  - column 0.75 * (x_width - 1)
   //  - column 1.00 * (x_width - 1);
 
+  // To figure out sampling, we want to first determine how many columns the
+  // sample should be.
+  //  - if the current width is between 7/8 and 9/8 of x_width, it is five
+  //  - if the current width is between 5/8 and 7/8 of x_width, it is four
+  //  - if the current width is between 3/8 and 5/8 of x_width, it is three
+  //  - if the current width is between 1/8 and 3/8 of x_width, it is two
+  //  - if the current width is between 0 and 1/8 of x_width, it is one
+  //  - if the current width is between 9/8 and 11/8 of x_width, it is six
+  // all values are exclusive on the left, inclusive on the right
+  int nr_cols = 1;
+  float frac = 0.125;
+  while (width > (frac * x_width)) {
+    nr_cols++;
+    frac += 0.25;
+  }
+  printf("Calculated number of columns: %d\n", nr_cols);
+
+  // Now that we know how many columns to produce, map each column to
+  // one or more columns in the original bitmap.
+
+  if (x_width < width) {
+    x_width = width;
+  }
+
   int row = 0;
   float x_fraction;
   int i;
@@ -336,12 +385,16 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
     int image_row = get_image_row_from_minimal_row(i, x_height);
     int bm_row = get_bitmap_row_from_image_row(image_row, baseline);
     if ((bm_row < height) && (bm_row >= 0)) {
+      printf("  image_row=%d, bm_row=%d, row=%d\n", image_row, bm_row, row);
       // bitmap row falls within the bitmap, so include it in the
       // minimal bitmap as (row)
       int col = 0;
-      for (x_fraction = 0.0; (x_fraction * (x_width - 1)) < width; x_fraction += 0.25) {
-	int bm_col = x_fraction * (x_width - 1);
+      for (x_fraction = 0.0; (x_fraction * (width - 1)) < width; x_fraction += (1.0 / (nr_cols - 1))) {
+	int bm_col = x_fraction * (width - 1);
+	// bm_col for an width=13 should be 0, 3, 6, 9, 12
+	//   but it is 0, 2, 5, 8, 11
 	if ((bm_col >= 0) && (bm_col < width)) {
+	  printf("  bm_col=%d, col=%d, x_fraction=%f\n", bm_col, col, x_fraction);
 	  bitmap_set_bit(minimal_bm, col, row,
 			 get_aggregate_bit(bm, bm_col, bm_row));
 	}
