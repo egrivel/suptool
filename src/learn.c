@@ -37,10 +37,11 @@ void read_file(char *fname) {
     int baseline = code_to_baseline(code);
 
     if (strlen(string) == 1) {
-      Bitmap minimal_bm = bitmap_to_minimal(bm, baseline, x_width, x_height);
-      
       printf("Starting with this bitmap:\n");
       dump_bitmap(bm);
+
+      Bitmap minimal_bm = bitmap_to_minimal(bm, baseline, x_width, x_height);
+      
       printf("\nresulting in this minimal bitmap:\n");
       dump_bitmap(minimal_bm);
       printf("\n\n");

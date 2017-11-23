@@ -292,6 +292,8 @@ int get_bitmap_row_from_image_row(int nr, int baseline) {
   return (baseline - nr);
 }
 
+// Getting the "aggregate" bit: looking at the actual bit, but taking the
+// surrounding bits into account as well.
 bool get_aggregate_bit(Bitmap bm, int col, int row) {
   int height = bitmap_get_height(bm);
   int width = bitmap_get_width(bm);
@@ -314,6 +316,7 @@ bool get_aggregate_bit(Bitmap bm, int col, int row) {
 	bit_count++;
 	if (i == row) {
 	  bit_count++;
+
 	}
 	if (j == col) {
 	  bit_count++;
@@ -384,7 +387,7 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   for (i = 1; i <= 15; i++) {
     int image_row = get_image_row_from_minimal_row(i, x_height);
     int bm_row = get_bitmap_row_from_image_row(image_row, baseline);
-    if ((bm_row < height) && (bm_row >= 0)) {
+    if ((bm_row >= 0) && (bm_row < height)) {
       printf("  image_row=%d, bm_row=%d, row=%d\n", image_row, bm_row, row);
       // bitmap row falls within the bitmap, so include it in the
       // minimal bitmap as (row)
@@ -392,7 +395,6 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
       for (x_fraction = 0.0; (x_fraction * (width - 1)) < width; x_fraction += (1.0 / (nr_cols - 1))) {
 	int bm_col = x_fraction * (width - 1);
 	// bm_col for an width=13 should be 0, 3, 6, 9, 12
-	//   but it is 0, 2, 5, 8, 11
 	if ((bm_col >= 0) && (bm_col < width)) {
 	  printf("  bm_col=%d, col=%d, x_fraction=%f\n", bm_col, col, x_fraction);
 	  bitmap_set_bit(minimal_bm, col, row,
@@ -421,7 +423,7 @@ void dump_bitmap(Bitmap bm) {
 	for (x = 0; x < width; x++) {
 	  data[x] = bitmap_get_bit(bm, x, y) ? 'X' : '.';
 	}
-	printf("# %s\n", data);
+	printf("# %02d %s\n", y, data);
       }
       free(data);
     }
