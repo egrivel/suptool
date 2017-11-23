@@ -26,9 +26,11 @@ void bitmap_destroy(Bitmap bm);
 // implicitly by adding bits
 void bitmap_set_width(Bitmap bm, int width);
 void bitmap_set_height(Bitmap bm, int height);
+void bitmap_set_baseline(Bitmap bm, int baseline);
 
 int bitmap_get_width(Bitmap bm);
 int bitmap_get_height(Bitmap bm);
+int bitmap_get_baseline(Bitmap bm);
 
 // Set or clear a bit in the bitmap. The bitmap's size is automatically
 // extended if needed.
