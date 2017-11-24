@@ -24,7 +24,7 @@ Bitmap bitmap_create() {
   if (bm != NULL) {
     bm->width = 0;
     bm->height = 0;
-    bm->baseline = 0;
+    bm->baseline = -999;
     bm->data = NULL;
   }
   return bm;

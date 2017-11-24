@@ -30,11 +30,12 @@ void read_file(char *fname) {
   int i;
   for (i = 0; i < nr_entries; i++) {
     char *code = charlist_get_code(i);
-    printf("Got code %s\n", code);
+    // printf("Got code %s\n", code);
     char *string = get_char_string(code);
-    // int style = charlist_get_style(code);
+    char *style = charlist_get_style_name(code);
     Bitmap bm = code_to_bitmap(code);
     int baseline = code_to_baseline(code);
+    bitmap_set_baseline(bm, baseline);
 
     if (strlen(string) == 1) {
       printf("Starting with this bitmap:\n");
@@ -42,8 +43,14 @@ void read_file(char *fname) {
 
       Bitmap minimal_bm = bitmap_to_minimal(bm, baseline, x_width, x_height);
       
-      printf("\nresulting in this minimal bitmap:\n");
+      // printf("\nresulting in this minimal bitmap:\n");
       dump_bitmap(minimal_bm);
+      char *minimal_code = encode_bitmap_base(minimal_bm,
+					      0, bitmap_get_height(minimal_bm),
+					      0, bitmap_get_width(minimal_bm),
+					      bitmap_get_height(minimal_bm));
+      printf("%s.ch = %s\n", minimal_code, string);
+      printf("%s.style = %s\n", minimal_code, style);
       printf("\n\n");
 
     // int minimal_baseline = 0;

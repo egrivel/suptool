@@ -256,6 +256,58 @@ int get_image_row_from_minimal_row(int nr, int x_height) {
   return 0;
 }
 
+// This is the inverse of the function above
+int get_minimal_row_from_image_row(int row, int x_height) {
+  int minimal_row = 0;
+  if (row <= x_height * 2) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.75)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.50)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.25)) {
+    minimal_row++;
+  }
+  if (row <= (x_height + 1)) {
+    minimal_row++;
+  }
+  if (row <= (x_height - 1)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.75)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.50)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.25)) {
+    minimal_row++;
+  }
+  if (row <= 0) {
+    minimal_row++;
+  }
+  if (row <= -2) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.25)) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.50)) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.75)) {
+    minimal_row++;
+  }
+  if (row <= -x_height) {
+    minimal_row++;
+  }
+
+  return minimal_row;
+}
+
 // Assuming the image has row 0 as the baseline row and row number
 // above that are positive, row numbers below that are negative.
 //
@@ -345,9 +397,9 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   int width = bitmap_get_width(bm);
   int height = bitmap_get_height(bm);
 
-  printf("Creating minimal bitmap\n");
-  printf("  baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
-  printf("  width=%d, height=%d\n", width, height);
+  printf("# Creating minimal bitmap\n");
+  printf("#   baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
+  printf("#   width=%d, height=%d\n", width, height);
   
   // The minimal bitmap would sample the letter "x" as a 5x5 pattern.
   // So use as horizontal sampling:
@@ -372,7 +424,7 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
     nr_cols++;
     frac += 0.25;
   }
-  printf("Calculated number of columns: %d\n", nr_cols);
+  printf("# Calculated number of columns: %d\n", nr_cols);
 
   // Now that we know how many columns to produce, map each column to
   // one or more columns in the original bitmap.
@@ -381,6 +433,12 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
     x_width = width;
   }
 
+  int minimal_baseline = get_minimal_row_from_image_row(baseline, height);
+  printf("# baseline=%d, x_height=%d, minimal_baseline=%d\n",
+	 baseline, x_height, minimal_baseline);
+
+  bitmap_set_baseline(minimal_bm, minimal_baseline);
+
   int row = 0;
   float x_fraction;
   int i;
@@ -388,7 +446,7 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
     int image_row = get_image_row_from_minimal_row(i, x_height);
     int bm_row = get_bitmap_row_from_image_row(image_row, baseline);
     if ((bm_row >= 0) && (bm_row < height)) {
-      printf("  image_row=%d, bm_row=%d, row=%d\n", image_row, bm_row, row);
+      // printf("  image_row=%d, bm_row=%d, row=%d\n", image_row, bm_row, row);
       // bitmap row falls within the bitmap, so include it in the
       // minimal bitmap as (row)
       int col = 0;
@@ -396,7 +454,7 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
 	int bm_col = x_fraction * (width - 1);
 	// bm_col for an width=13 should be 0, 3, 6, 9, 12
 	if ((bm_col >= 0) && (bm_col < width)) {
-	  printf("  bm_col=%d, col=%d, x_fraction=%f\n", bm_col, col, x_fraction);
+	  // printf("  bm_col=%d, col=%d, x_fraction=%f\n", bm_col, col, x_fraction);
 	  bitmap_set_bit(minimal_bm, col, row,
 			 get_aggregate_bit(bm, bm_col, bm_row));
 	}
@@ -413,17 +471,34 @@ void dump_bitmap(Bitmap bm) {
   if (bm != NULL) {
     int width = bitmap_get_width(bm);
     int height = bitmap_get_height(bm);
+    int baseline = bitmap_get_baseline(bm);
     printf("# Bitmap dump %d wide x %d high\n", width, height);
     if ((width > 0) && (height > 0)) {
       int y = 0;
       char *data = malloc(width + 1);
       memset(data, 0, width + 1);
-      for (y = 0; y < height; y++) {
+      int rows = height;
+      if (baseline > -999) {
+	if (baseline >= rows) {
+	  rows = baseline + 1;
+	}
+      }
+      for (y = 0; y < rows; y++) {
 	int x = 0;
 	for (x = 0; x < width; x++) {
-	  data[x] = bitmap_get_bit(bm, x, y) ? 'X' : '.';
+	  if (y < height) {
+	    data[x] = bitmap_get_bit(bm, x, y) ? 'X' : '.';
+	  } else {
+	    data[x] = ' ';
+	  }
 	}
 	printf("# %02d %s\n", y, data);
+	if (y == baseline) {
+	  for (x = 0; x < width; x++) {
+	    data[x] = '-';
+	  }
+	  printf("#    %s\n", data);
+	}
       }
       free(data);
     }
