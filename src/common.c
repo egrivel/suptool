@@ -18,3 +18,12 @@ unsigned short swap_int_16(int_16 s) {
       ((s & 0x00ff) << 8)
       | ((s & 0xff00) >> 8);
 }
+
+char *get_style_name(int style) {
+  switch (style) {
+  case STYLE_NORMAL:  return "normal";
+  case STYLE_ITALIC:  return "italic";
+  case STYLE_EITHER:  return "either";
+  default: return "unknown";
+  }
+}

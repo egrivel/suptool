@@ -65,11 +65,7 @@ int charlist_get_style(char *code) {
 char *charlist_get_style_name(char *code) {
    CharItem *item = get_char_item(code);
    if (item != NULL) {
-      switch (item->style) {
-      case STYLE_NORMAL:  return "normal";
-      case STYLE_ITALIC:  return "italic";
-      case STYLE_EITHER:  return "either";
-      }
+     return get_style_name(item->style);
    }
    return "unknown";
 }

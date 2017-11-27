@@ -49,4 +49,6 @@ int_32 swap_int_32(int_32 i);
 #define STYLE_ITALIC   0x02
 #define STYLE_EITHER   0x03
 
+char *get_style_name(int style);
+
 #endif /* _COMMON_INCLUDED */

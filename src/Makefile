@@ -13,7 +13,8 @@ decode_base: decode_base.o common.o charutils.o bitmap.o subprop.o util.o
 string_to_char: string_to_char.o common.o charutils.o bitmap.o subprop.o util.o
 	gcc -o $@ $^
 
-learn: learn.o common.o charlist.o charutils.o subprop.o bitmap.o util.o process.o
+learn: learn.o common.o charlist.o charutils.o subprop.o bitmap.o util.o \
+	process.o minlist.o
 	gcc -o $@ $^
 
 common.o: common.c common.h
@@ -45,6 +46,9 @@ bitmap.o: bitmap.c common.h bitmap.h
 
 charutils.o: charutils.c common.h charutils.h bitmap.h
 	gcc -c -Wall charutils.c
+
+minlist.o: minlist.c common.h minlist.h
+	gcc -c -Wall minlist.c
 
 readsup.o: readsup.c common.h subtitle.h subformat.h supformat.h charlist.h output.h subprop.h
 	gcc -c -Wall readsup.c

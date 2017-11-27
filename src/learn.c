@@ -6,6 +6,7 @@
 #include "charlist.h"
 #include "charutils.h"
 #include "bitmap.h"
+#include "minlist.h"
 
 void read_file(char *fname) {
   read_char_data(fname);
@@ -26,6 +27,8 @@ void read_file(char *fname) {
   bitmap_destroy(default_bm);
   printf("Got x_width=%d, x_height=%d\n", x_width, x_height);
 
+  minlist_read("minimal.data");
+
   int nr_entries = charlist_nr_entries();
   int i;
   for (i = 0; i < nr_entries; i++) {
@@ -33,11 +36,12 @@ void read_file(char *fname) {
     // printf("Got code %s\n", code);
     char *string = get_char_string(code);
     char *style = charlist_get_style_name(code);
+    int style_value = charlist_get_style(code);
     Bitmap bm = code_to_bitmap(code);
     int baseline = code_to_baseline(code);
     bitmap_set_baseline(bm, baseline);
 
-    if (strlen(string) == 1) {
+    if (strlen(string) < 10) {
       printf("Starting with this bitmap:\n");
       dump_bitmap(bm);
 
@@ -45,24 +49,25 @@ void read_file(char *fname) {
       
       // printf("\nresulting in this minimal bitmap:\n");
       dump_bitmap(minimal_bm);
-      char *minimal_code = encode_bitmap_base(minimal_bm,
-					      0, bitmap_get_height(minimal_bm),
-					      0, bitmap_get_width(minimal_bm),
-					      bitmap_get_height(minimal_bm));
+      char *minimal_code = bitmap_to_code(minimal_bm, bitmap_get_height(minimal_bm));;
       printf("%s.ch = %s\n", minimal_code, string);
       printf("%s.style = %s\n", minimal_code, style);
       printf("\n\n");
 
-    // int minimal_baseline = 0;
-    // char *minimal_code = bitmap_to_code(minimal, minimal_baseline);
-    // printf("Got '%s'\n", minimal_code);
-    // free(minimal_code);
+      minlist_add(minimal_code, string, style_value);
 
+      // int minimal_baseline = 0;
+      // char *minimal_code = bitmap_to_code(minimal, minimal_baseline);
+      // printf("Got '%s'\n", minimal_code);
+      // free(minimal_code);
+      
       bitmap_destroy(minimal_bm);
     }
 
     bitmap_destroy(bm);
   }
+
+  minlist_write("minimal.data");
 }
 
 int main(int argc, char *argv[]) {
