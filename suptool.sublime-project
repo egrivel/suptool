@@ -1,0 +1,31 @@
+{
+  "folders":
+  [
+    {
+      "path": ".",
+      "name": "suptool",
+      "folder_exclude_patterns": [
+        "CVS",
+        "node_modules",
+        "coverage",
+        "lib",
+        "docs",
+        "dist",
+        ".sonar"
+      ],
+      "file_exclude_patterns": [
+        "vacationblog.sublime-workspace",
+        "*.tar*"
+      ]
+    }
+  ],
+  "settings": {
+    "tab_size": 2,
+    "translate_tabs_to_spaces": true,
+    "rulers": [80],
+    "trim_trailing_white_space_on_save": true,
+    "ensure_newline_at_eof_on_save": true,
+    "save_on_focus_lost": true,
+    "default_line_ending": "unix"
+  }
+}

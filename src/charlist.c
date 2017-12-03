@@ -52,7 +52,7 @@ void set_char_string(char *code, char *string) {
       item->string = strdup(string);
    }
 }
-   
+
 
 int charlist_get_style(char *code) {
    CharItem *item = get_char_item(code);
@@ -298,7 +298,7 @@ void decode_bits(int nr) {
       }
       decode_in_mask /= 2;
    }
-}   
+}
 
 char *encode_bitmap_base(Bitmap bm,
                          int line_start, int line_end,
@@ -733,4 +733,18 @@ char *charlist_get_code(int nr) {
     return charlist[nr].code;
   }
   return NULL;
+}
+
+void charlist_reset() {
+  int i;
+  for (i = 0; i < nr_chars; i++) {
+    free(charlist[i].code);
+    charlist[i].code = NULL;
+    free(charlist[i].string);
+    charlist[i].string = NULL;
+  }
+  free((unsigned char *)charlist);
+  charlist = NULL;
+  nr_chars = 0;
+  capacity = 0;
 }

@@ -51,12 +51,12 @@ int bitmap_calc_offset(int width, int height, int x, int y) {
 void bitmap_resize(Bitmap bm, int new_width, int new_height) {
   int old_width = bm->width;
   int old_height = bm->height;
-  
+
   if ((bm == NULL) || (new_width < 0) || (new_height < 0)) {
     // Invalid input: ignored
     return;
   }
-  
+
   // do not decrease in size
   if (new_width < old_width) {
     new_width = old_width;
@@ -64,7 +64,7 @@ void bitmap_resize(Bitmap bm, int new_width, int new_height) {
   if (new_height < old_height) {
     new_height = old_height;
   }
-  
+
   if ((new_width == 0) || (new_height == 0)) {
     // With a width or height of zero, there is no data, so just
     // record the new sizes (if any)
@@ -72,12 +72,12 @@ void bitmap_resize(Bitmap bm, int new_width, int new_height) {
     bm->height = new_height;
     return;
   }
-  
+
   if ((new_width == old_width) && (new_height == old_height)) {
     // no change in size
     return;
   }
-  
+
   char *new_data = malloc(new_width * new_height);
   memset(new_data, BIT_CLEAR, new_width * new_height);
   if (bm->data != NULL) {

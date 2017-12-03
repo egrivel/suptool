@@ -72,7 +72,7 @@ unsigned char *code_to_bytes(char *code, int *length) {
 
   *length = 0;
   int outbits = 0;
-  
+
   while (*code) {
     int value ;
     if ((*code >= '0') && (*code <= '9')) {
@@ -169,7 +169,7 @@ Bitmap code_to_bitmap(char *code) {
   while (nr_bits) {
     bool bit = bytes[byte_ptr] & mask;
     bitmap_set_bit(bm, x, y, bit);
- 
+
     x++;
     if (x >= width) {
       y++;
@@ -184,7 +184,7 @@ Bitmap code_to_bitmap(char *code) {
 
     nr_bits--;
   }
-  
+
   return bm;
 }
 
@@ -216,9 +216,9 @@ int code_to_height(char *code) {
 }
 
 // The following rows make up the "minimal" image map:
-//  1. Image row (x_height * 2.00) is fifth ascender 
-//  2. Image row (x_height * 1.75) is fourth ascender 
-//  3. Image row (x_height * 1.50) is third ascender 
+//  1. Image row (x_height * 2.00) is fifth ascender
+//  2. Image row (x_height * 1.75) is fourth ascender
+//  3. Image row (x_height * 1.50) is third ascender
 //  4. Image row (x_height * 1.25) is second ascender
 //  5. Image row (x_height + 1) is first ascender
 //
@@ -311,7 +311,7 @@ int get_minimal_row_from_image_row(int row, int x_height) {
 // Assuming the image has row 0 as the baseline row and row number
 // above that are positive, row numbers below that are negative.
 //
-// if (height-1) equal to baseline, 
+// if (height-1) equal to baseline,
 //  - bitmap row 0 is image row heigth-1
 //  - bitmap row 1 is image row height-2
 //  - bitmap row n is image row (height-n-1)
@@ -400,7 +400,7 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   printf("# Creating minimal bitmap\n");
   printf("#   baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
   printf("#   width=%d, height=%d\n", width, height);
-  
+
   // The minimal bitmap would sample the letter "x" as a 5x5 pattern.
   // So use as horizontal sampling:
   //  - column 0 * (x_width - 1)
@@ -507,7 +507,7 @@ void dump_bitmap(Bitmap bm) {
 
 void dump_code(char *string) {
   int length;
-  unsigned char *buffer = code_to_bytes(string, &length); 
+  unsigned char *buffer = code_to_bytes(string, &length);
 
   if (length < 3) {
     // We need to get at least 3 bytes of data back with height, width and
@@ -517,15 +517,15 @@ void dump_code(char *string) {
 	   length);
     exit(0);
   }
-  
+
   int height = buffer[0];
   int width = buffer[1];
   int baseline = buffer[2];
-  
+
   printf("# Start of character dump baseline %d\n", baseline);
   printf("# (0, 0) to (%d, %d): %d wide, %d high\n",
 	 width-1, height-1, width, height);
-  
+
   // Based on width and height, determine the total number of bits we have
   // to process, and make sure they are all there in the data
   int nr_bits = width * height;
@@ -541,7 +541,7 @@ void dump_code(char *string) {
     printf("\n");
     exit(0);
   }
-  
+
   // Know that the buffer has enough data, start peeling bits off
   int row = 0;
   int col = 0;
@@ -558,7 +558,7 @@ void dump_code(char *string) {
     } else {
       printf(".");
     }
-    
+
     mask = mask / 2;
     if (mask == 0) {
       ptr++;
@@ -579,7 +579,7 @@ void dump_code(char *string) {
       }
     }
   }
-  
+
   if (row <= baseline) {
     while (row <= baseline) {
       printf("# %02d:\n", row++);

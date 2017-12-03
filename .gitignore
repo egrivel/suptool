@@ -17,3 +17,4 @@ readsup.data
 *.out
 *.txt
 .cvsignore
+suptool.sublime-workspace

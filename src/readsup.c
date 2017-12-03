@@ -304,7 +304,7 @@ void subtitle_line_properties(Subtitle sbt, int nr, LineSizes *sizes) {
                }
             }
             if ((ascender == 0)
-                || (base == 0) 
+                || (base == 0)
                 || (descender == 0)) {
                // this section doesn't match the pattern
                match_pattern = false;
@@ -373,7 +373,7 @@ void subtitle_line_properties(Subtitle sbt, int nr, LineSizes *sizes) {
          }
       }
       if ((ascender == 0)
-          || (base == 0) 
+          || (base == 0)
           || (descender == 0)) {
          // this section doesn't match the pattern
          match_pattern = false;
@@ -410,7 +410,7 @@ bool find_line_up(Bitmap bm, int block_width, int block_height,
 
    if (x == (block_width - 1)) {
       // If we're moving up, a pixel at the right edge is still the end part
-      // of a mark above the current letter, e.g. with an italic 'i', so 
+      // of a mark above the current letter, e.g. with an italic 'i', so
       // those are still acceptable parts of the line up
       line[y] = x + 1;
       result = find_line_up(bm, block_width, block_height,
@@ -425,7 +425,7 @@ bool find_line_up(Bitmap bm, int block_width, int block_height,
       // Reached the top, so done
       return true;
    }
-      
+
    while (!result
           && (x >= 0)
           && (x < block_width)
@@ -433,7 +433,7 @@ bool find_line_up(Bitmap bm, int block_width, int block_height,
       line[y] = x;
       if (!result && (!bitmap_get_bit(bm, x, y - 1))) {
          if (debug) {
-            printf("Try (%d, %d) which is '%c'\n", x, y-1, 
+            printf("Try (%d, %d) which is '%c'\n", x, y-1,
                    bitmap_get_bit(bm, x, y-1) ? '*' : ' ');
          }
          result = find_line_up(bm, block_width, block_height,
@@ -488,7 +488,7 @@ bool find_line_down(Bitmap bm, int block_width, int block_height,
       // Reached the bottom, so done
       return true;
    }
-      
+
    while (!result
           && (x >= 0)
           && (x < block_width)
@@ -530,42 +530,6 @@ bool find_line_down(Bitmap bm, int block_width, int block_height,
    return result;
 }
 
-char **memory = NULL;
-int memory_capacity = 0;
-int memory_count = 0;
-void remember_guess(char *text, bool style) {
-   if (memory_capacity == 0) {
-      memory_capacity = 32;
-      memory = malloc(memory_capacity * sizeof(char *));
-   } else if (memory_count == memory_capacity) {
-      int new_capacity = 2 * memory_capacity;
-      char **new_memory = malloc(new_capacity * sizeof(char *));
-      memcpy(new_memory, memory, memory_capacity * sizeof(char *));
-      free(memory);
-      memory = new_memory;
-      memory_capacity = new_capacity;
-   }
-
-   char *buffer = malloc(strlen(text) + 3);
-   if (style) {
-      strcpy(buffer, "I-");
-   } else {
-      strcpy(buffer, "N-");
-   }
-   strcat(buffer, text);
-   int i;
-   for (i = 0; i < memory_count; i++) {
-      if (!strcmp(buffer, memory[i])) {
-         // Already have this one
-         // printf("# --- this is a duplicate ---\n");
-         free(buffer);
-         return;
-      }
-   }
-   memory[memory_count] = buffer;
-   memory_count++;
-}
-
 void process_single_char(Bitmap bm, int block_height, int block_width,
                          int baseline, int alt_base1, int alt_base2,
                          int nr_try, char *fname, bool debug) {
@@ -592,25 +556,6 @@ void process_single_char(Bitmap bm, int block_height, int block_width,
       bases[13] = alt_base2 + 2;
       bases[14] = alt_base2 - 2;
       nr_bases = 15;
-   }      
-   char *base_encode = NULL;
-   for (i = 0; i < nr_bases; i++) {
-      base_encode = encode_bitmap_base(bm, 0, block_height - 1,
-                                       0, block_width - 1,
-                                       bases[i]);
-      if (has_char(base_encode)) {
-         // found a match
-         break;
-      } else {
-         free(base_encode);
-         base_encode = NULL;
-      }
-   }
-   if (base_encode == NULL) {
-      // None found, revert to regular baseline
-      base_encode = encode_bitmap_base(bm, 0, block_height - 1,
-                                       0, block_width - 1,
-                                       baseline);
    }
 
    char *full_encode = NULL;
@@ -629,69 +574,15 @@ void process_single_char(Bitmap bm, int block_height, int block_width,
       full_encode = bitmap_to_code(bm, baseline);
    }
 
-   char *base_result = NULL;
-   int base_style = STYLE_UNKNOWN;
-   // char *base_style_name = NULL;
-
    char *full_result = NULL;
    int full_style = STYLE_UNKNOWN;
    // char *full_style_name = NULL;
 
-   
-   if (has_char(base_encode)) {
-      // use this as the base value
-      base_result = get_char_string(base_encode);
-      base_style = charlist_get_style(base_encode);
-      // base_style_name = charlist_get_style_name(base_encode);
-   }
    if (has_char(full_encode)) {
       full_result = get_char_string(full_encode);
       full_style = charlist_get_style(full_encode);
       // full_style_name = charlist_get_style_name(full_encode);
-   } 
-
-   if (base_result == NULL) {
-      //printf("# Start of character dump baseline %d (first in %d/%d):\n", baseline, nr_try, gl_cur_subtitle);
-      if (full_result == NULL) {
-         //   printf("%s.ch = \n", base_encode);
-         //   printf("%s.style = unknown\n", base_encode);
-      } else {
-         //    printf("# --- the following is a guess ---\n");
-         remember_guess(full_result, full_style);
-         // printf("%s.ch = %s\n", base_encode, full_result);
-         // printf("%s.style = %s\n", base_encode, full_style_name);
-      }
-      add_char(base_encode);
-   } else {
-      if ((full_result != NULL) && strlen(full_result)) {
-         // bool match = false;
-         int len = strlen(full_result);
-         int i = 0;
-         while (i < strlen(base_result)) {
-            int base_len = 0;
-            while ((base_result[i + base_len] != '\0')
-                   && (base_result[i + base_len] != ' ')) {
-               base_len++;
-            }
-            // possibly found an item in the base result
-            if (base_len == len) {
-               if (!memcmp(base_result + i, full_result, len)) {
-                  // match = true;
-               }
-            }
-            i += base_len + 1;
-         }
-         /*
-         if (!match || ((base_style & full_style) == 0x00)) {
-            printf("# --- in %d/%d:\n", nr_try, gl_cur_subtitle);
-            printf("# --- base encoding %s can be:\n", base_encode);
-            printf("#      - '%s' %s (base)\n", base_result, base_style_name);
-            printf("#      - '%s' %s (full)\n", full_result, full_style_name);
-         }
-         */
-      }
    }
-         
 
    if (debug || (full_result == NULL)) {
       printf("# Start of character dump baseline %d (first in %s %d/%d):\n", baseline, fname, nr_try, gl_cur_subtitle);
@@ -701,15 +592,10 @@ void process_single_char(Bitmap bm, int block_height, int block_width,
       add_char(full_encode);
    }
 
-   if ((base_result != NULL) && (full_result != NULL)) {
+   if (full_result != NULL) {
       output_string(full_result, full_style);
-   } else if (base_result != NULL) {
-      output_string(base_result, base_style);
-   } else if (full_result != NULL) {
-      output_string(full_result, full_style);
-   } else {
    }
-   free(base_encode);
+
    free(full_encode);
 }
 
@@ -787,7 +673,7 @@ void process_char(Bitmap bm, int line_start, int line_end, int baseline, int alt
 
    // Move through the character in the following direction:
    //    1   2   3
-   //    8       4 
+   //    8       4
    //    7   6   5
    int finger_x = 0;
    int finger_y = block_height - 1;
@@ -892,7 +778,7 @@ void process_char(Bitmap bm, int line_start, int line_end, int baseline, int alt
                   finger_x = next_x;
                   break;
                } else if (next_y > (block_height - 1)) {
-                  // reaching the bottom of the block. 
+                  // reaching the bottom of the block.
                   // direction has to be one of 5, 6 or 7 to have the y_value
                   // increased. So there are two possibilities:
                   //  - we just came from another pixel, and start looking
@@ -1013,21 +899,21 @@ void process_char(Bitmap bm, int line_start, int line_end, int baseline, int alt
                }
             }
          }
-         
+
          if (debug) {
             printf("Got new block:\n");
 	    dump_bitmap(temp_bm);
             printf("Old block has become:\n");
 	    dump_bitmap(new_bm);
          }
-         
+
          // Process the first new character
          if (gl_debug_subtitle == subtitle_nr) {
             printf("Process first character #%d\n", nr_try);
          }
          process_char(temp_bm, 0, (block_height - 1), baseline, alt_base1, alt_base2, 0, new_width - 1, subtitle_nr, fname);
          bitmap_destroy(temp_bm);
-         
+
          is_data = false;
          // figure out the char_start value of the remainder
          for (char_start = 0; char_start < block_width; char_start++) {
@@ -1041,7 +927,7 @@ void process_char(Bitmap bm, int line_start, int line_end, int baseline, int alt
                break;
             }
          }
-         
+
          // recursively process the remainder
          if (gl_debug_subtitle == subtitle_nr) {
             printf("Process remainder #%d\n", nr_try);
@@ -1109,7 +995,7 @@ void parse_line(Subtitle sbt, int line_start, int line_end, int baseline,
          }
       }
    }
-   
+
    if (char_start >= 0) {
       if (prev_char_end > -1) {
          if ((char_start - prev_char_end) > get_normal_space_width()) {
@@ -1147,7 +1033,7 @@ bool approx_equal(int nr1, int nr2) {
               || (nr1 == (nr2 - 1)));
    }
 }
-               
+
 
 void process_subtitle(char *fname, int nr, LineSizes *sizes) {
    gl_cur_subtitle = nr;
@@ -1191,7 +1077,7 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
    int line_nr = 1;
    int line_start = 0;
    while (line_start < subtitle_get_height(sbt)) {
-      while ((line_start < subtitle_get_height(sbt)) 
+      while ((line_start < subtitle_get_height(sbt))
              && (scan_lines[line_start] == 0)) {
          line_start++;
       }
@@ -1199,7 +1085,7 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
       int max_width = 0;
       // Start at the first line with data and try and find the end. Note
       // that we would expect at least the base height for the line height
-      while ((line_end < subtitle_get_height(sbt)) 
+      while ((line_end < subtitle_get_height(sbt))
              && ((scan_lines[line_end] != 0)
                  || (line_end < line_start + sizes->base_height))) {
          if (scan_lines[line_end] > max_width) {
@@ -1229,7 +1115,7 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
 
       alt_base1 = base;
       alt_base2 = base;
-      // Check for sanity. 
+      // Check for sanity.
       if (approx_equal(line_end - line_start, sizes->base_height + sizes->ascender_height + sizes->descender_height)) {
          // line seems to have ascenders and descenders
          if (!approx_equal(base, line_start + sizes->ascender_height + sizes->base_height)) {
@@ -1252,7 +1138,7 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
          printf("Subtitle %d: found line_start=%d, line_end=%d, baseline=%d\n",
                 nr, line_start, line_end, base);
          printf("      base=%d, asc=%d, desc=%d, alt_base1=%d, alt_base2=%d\n",
-                sizes->base_height, sizes->ascender_height, sizes->descender_height, 
+                sizes->base_height, sizes->ascender_height, sizes->descender_height,
                 alt_base1, alt_base2);
 	 dump_bitmap(subtitle_bitmap(sbt));
          // dump_char(subtitle_bitmap(sbt), line_start, line_end, 0, subtitle_get_width(sbt));
@@ -1261,7 +1147,7 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
       parse_line(sbt, line_start, line_end, base, alt_base1, alt_base2, nr, fname);
 
       line_start = line_end;
-      while ((line_start < subtitle_get_height(sbt)) 
+      while ((line_start < subtitle_get_height(sbt))
              && (scan_lines[line_start] == 0)) {
          line_start++;
       }

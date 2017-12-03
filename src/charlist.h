@@ -20,4 +20,6 @@ char *charlist_find_by_string(char *string, int style);
 int charlist_nr_entries();
 char *charlist_get_code(int nr);
 
+void charlist_reset();
+
 #endif /* _CHARLIST_INCLUDED */

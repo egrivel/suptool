@@ -8,12 +8,16 @@
 #include "bitmap.h"
 #include "minlist.h"
 
+/**
+ * Read a data file from which to learn. The data file should be a standard
+ * "readsup.data" file with bitmaps for individual characters in a specific
+ * set of subtitles.
+ */
 void read_file(char *fname) {
   read_char_data(fname);
-  
+
   // In order to determine the most common width and height in a
   // subtitle file, go with the lowercase letter "x" for a pretty
-  // good approximation.
   char *code = charlist_find_by_string("x", STYLE_NORMAL);
   if (code == NULL) {
     printf("Cannot find reference character 'x'\n");
@@ -21,13 +25,10 @@ void read_file(char *fname) {
   }
 
   Bitmap default_bm = code_to_bitmap(code);
-  // int default_baseline = code_to_baseline(code);
   int x_width = bitmap_get_width(default_bm);
   int x_height = bitmap_get_height(default_bm);
   bitmap_destroy(default_bm);
   printf("Got x_width=%d, x_height=%d\n", x_width, x_height);
-
-  minlist_read("minimal.data");
 
   int nr_entries = charlist_nr_entries();
   int i;
@@ -46,10 +47,11 @@ void read_file(char *fname) {
       dump_bitmap(bm);
 
       Bitmap minimal_bm = bitmap_to_minimal(bm, baseline, x_width, x_height);
-      
+
       // printf("\nresulting in this minimal bitmap:\n");
       dump_bitmap(minimal_bm);
-      char *minimal_code = bitmap_to_code(minimal_bm, bitmap_get_height(minimal_bm));;
+      char *minimal_code = bitmap_to_code(minimal_bm,
+          bitmap_get_baseline(minimal_bm));;
       printf("%s.ch = %s\n", minimal_code, string);
       printf("%s.style = %s\n", minimal_code, style);
       printf("\n\n");
@@ -60,14 +62,14 @@ void read_file(char *fname) {
       // char *minimal_code = bitmap_to_code(minimal, minimal_baseline);
       // printf("Got '%s'\n", minimal_code);
       // free(minimal_code);
-      
+
       bitmap_destroy(minimal_bm);
     }
 
     bitmap_destroy(bm);
   }
 
-  minlist_write("minimal.data");
+  charlist_reset();
 }
 
 int main(int argc, char *argv[]) {
@@ -77,9 +79,13 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
+  minlist_read("minimal.data");
+
   for (i = 1; i < argc; i++) {
     read_file(argv[i]);
   }
+
+  minlist_write("minimal.data");
 
   return 0;
 }
