@@ -3,6 +3,10 @@
 #include "common.h"
 #include "minlist.h"
 
+// Separator to use between different character strings
+#define SEPARATOR      " "
+#define SEPARATOR_CHAR ' '
+
 typedef struct {
   char *code;
   char *string;
@@ -31,9 +35,9 @@ void minlist_add_string_to_item(MinItem *item, char *string, int style) {
   printf("Code %s: look for '%s' in '%s'\n", item->code, string, item->string);
   // create a buffer large enough for the new item->string if we need it
   char *buffer = malloc(strlen(item->string) + strlen(string) + 3);
-  strcpy(buffer, "|");
+  strcpy(buffer, SEPARATOR);
   strcat(buffer, string);
-  strcat(buffer, "|");
+  strcat(buffer, SEPARATOR);
   if (strstr(item->string, buffer)) {
     // string is already in there, nothing left to do
     printf("   already exists\n");
@@ -44,7 +48,7 @@ void minlist_add_string_to_item(MinItem *item, char *string, int style) {
   // Create the new version of item->string
   strcpy(buffer, item->string);
   strcat(buffer, string);
-  strcat(buffer, "|");
+  strcat(buffer, SEPARATOR);
 
   // destroy the old version
   free(item->string);;
@@ -75,9 +79,9 @@ void minlist_add(char *code, char *string, int style) {
   if (minlist_items < minlist_capacity) {
     minlist[minlist_items].code = strdup(code);
     minlist[minlist_items].string = malloc(strlen(string) + 3);
-    strcpy(minlist[minlist_items].string, "|");
+    strcpy(minlist[minlist_items].string, SEPARATOR);
     strcat(minlist[minlist_items].string, string);
-    strcat(minlist[minlist_items].string, "|");
+    strcat(minlist[minlist_items].string, SEPARATOR);
     minlist[minlist_items].style = style;
     minlist_items++;
   }
@@ -91,87 +95,87 @@ void minlist_write(char *fname) {
   for (i = 0; i < minlist_items; i++) {
     fprintf(fout, "%s.ch = %s\n", minlist[i].code, minlist[i].string);
     fprintf(fout, "%s.style = %s\n", minlist[i].code,
-	    get_style_name(minlist[i].style));
+     get_style_name(minlist[i].style));
   }
   fclose(fout);
 }
 
 void minlist_read(char *fname) {
-   static char buffer[16384];
-   strcpy(buffer, "");
-   FILE *fin = fopen(fname, "rt");
-   if (fin == NULL) {
-      printf("Cannot read character data '%s'\n", fname);
-      return;
-   }
-   while (!feof(fin)) {
-      fgets(buffer, sizeof(buffer), fin);
-      if (strlen(buffer) > 0) {
-         int code_start = 0;
-         while (buffer[code_start] == ' ') {
-            code_start++;
-         }
-         if (buffer[code_start] != '#') {
-            int code_end = 0;
-            int type_start = 0;
-            int type_end = 0;
-            int value_start = 0;
-            int value_end = 0;
-            code_end = code_start;
-            while (buffer[code_end] && (buffer[code_end] != '.')) {
-               code_end++;
-            }
-            if (buffer[code_end] == '.') {
-               // Note: code_end can become -1 if line starts with 0
-               code_end--;
-               type_start = code_end + 2;
-            }
-            type_end = type_start;
-            while (buffer[type_end]
-                   && (buffer[type_end] != ' ')
-                   && (buffer[type_end] != '=')) {
-               type_end++;
-            }
-            type_end--;
-            value_start = type_end + 1;
-            while ((buffer[value_start] == ' ')
-                   || (buffer[value_start] == '=')) {
-               value_start++;
-            }
-            value_end = value_start;
-            while (buffer[value_end]
-                   && (buffer[value_end] != '\r')
-                   && (buffer[value_end] != '\n')) {
-               value_end++;
-            }
-            value_end--;
-
-            buffer[code_end + 1] = '\0';
-            buffer[type_end + 1] = '\0';
-            buffer[value_end + 1] = '\0';
-
-            if (!strcmp(&buffer[type_start], "ch")) {
-	      if (buffer[value_start] == '|') {
-		value_start++;
-	      }
-	      if (buffer[value_end] == '|') {
-		buffer[value_end] = '\0';
-	      }
-	      minlist_add(&buffer[code_start], &buffer[value_start], STYLE_UNKNOWN);
-            } else if (!strcmp(&buffer[type_start], "style")) {
-	      MinItem *item = minlist_find(&buffer[code_start]);
-	      if (item && item->style == STYLE_UNKNOWN) {
-		if (!strcmp(&buffer[value_start], "normal")) {
-                  item->style = STYLE_NORMAL;
-		} else if (!strcmp(&buffer[value_start], "italic")) {
-                  item->style = STYLE_ITALIC;
-		} else if (!strcmp(&buffer[value_start], "either")) {
-                  item->style = STYLE_EITHER;
-		}
-	      }
-	    }
-         }
+  static char buffer[16384];
+  strcpy(buffer, "");
+  FILE *fin = fopen(fname, "rt");
+  if (fin == NULL) {
+    printf("Cannot read character data '%s'\n", fname);
+    return;
+  }
+  while (!feof(fin)) {
+    fgets(buffer, sizeof(buffer), fin);
+    if (strlen(buffer) > 0) {
+      int code_start = 0;
+      while (buffer[code_start] == ' ') {
+        code_start++;
       }
-   }
-   fclose(fin);
+      if (buffer[code_start] != '#') {
+        int code_end = 0;
+        int type_start = 0;
+        int type_end = 0;
+        int value_start = 0;
+        int value_end = 0;
+        code_end = code_start;
+        while (buffer[code_end] && (buffer[code_end] != '.')) {
+          code_end++;
+        }
+        if (buffer[code_end] == '.') {
+          // Note: code_end can become -1 if line starts with 0
+          code_end--;
+          type_start = code_end + 2;
+        }
+        type_end = type_start;
+        while (buffer[type_end]
+               && (buffer[type_end] != ' ')
+              && (buffer[type_end] != '=')) {
+          type_end++;
+        }
+        type_end--;
+        value_start = type_end + 1;
+        while ((buffer[value_start] == ' ')
+               || (buffer[value_start] == '=')) {
+          value_start++;
+        }
+        value_end = value_start;
+        while (buffer[value_end]
+               && (buffer[value_end] != '\r')
+               && (buffer[value_end] != '\n')) {
+          value_end++;
+        }
+        value_end--;
+
+        buffer[code_end + 1] = '\0';
+        buffer[type_end + 1] = '\0';
+        buffer[value_end + 1] = '\0';
+
+        if (!strcmp(&buffer[type_start], "ch")) {
+          if (buffer[value_start] == SEPARATOR_CHAR) {
+            value_start++;
+          }
+          if (buffer[value_end] == SEPARATOR_CHAR) {
+            buffer[value_end] = '\0';
+          }
+          minlist_add(&buffer[code_start], &buffer[value_start], STYLE_UNKNOWN);
+        } else if (!strcmp(&buffer[type_start], "style")) {
+          MinItem *item = minlist_find(&buffer[code_start]);
+          if (item && item->style == STYLE_UNKNOWN) {
+            if (!strcmp(&buffer[value_start], "normal")) {
+              item->style = STYLE_NORMAL;
+            } else if (!strcmp(&buffer[value_start], "italic")) {
+              item->style = STYLE_ITALIC;
+            } else if (!strcmp(&buffer[value_start], "either")) {
+              item->style = STYLE_EITHER;
+            }
+          }
+        }
+      }
+    }
+  }
+  fclose(fin);
 }

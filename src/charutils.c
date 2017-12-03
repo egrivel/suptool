@@ -1,67 +1,67 @@
 /*
- * Character utilities
- */
+* Character utilities
+*/
 
 #include "common.h"
 #include "bitmap.h"
 #include "charutils.h"
 
 char *bytes_to_code(unsigned char *data, int nr_bytes) {
-   char *string = malloc(2 * nr_bytes + 1);
+  char *string = malloc(2 * nr_bytes + 1);
 
-   int i = 0;
-   int offset = 0;
-   int mask = 0x80;
-   int single_value = 0;
-   int nr_bits = 0;
-   while (offset < nr_bytes) {
-      single_value = 2 * single_value;
-      if (data[offset] & mask) {
-         single_value++;
+  int i = 0;
+  int offset = 0;
+  int mask = 0x80;
+  int single_value = 0;
+  int nr_bits = 0;
+  while (offset < nr_bytes) {
+    single_value = 2 * single_value;
+    if (data[offset] & mask) {
+      single_value++;
+    }
+    nr_bits++;
+    if (nr_bits > 5) {
+      if (single_value < 10) {
+        single_value += '0';
+      } else if (single_value < 36) {
+        single_value += 'A' - 10;
+      } else if (single_value < 62) {
+        single_value += 'a' - 36;
+      } else if (single_value == 62) {
+        single_value = '-';
+      } else {
+        single_value = '_';
       }
+      string[i++] = single_value;
+      single_value = 0;
+      nr_bits = 0;
+    }
+    mask = mask / 2;
+    if (mask == 0) {
+      offset++;
+      mask = 0x80;
+    }
+  }
+  if (nr_bits > 0) {
+    while (nr_bits <= 5) {
+      single_value *= 2;
       nr_bits++;
-      if (nr_bits > 5) {
-         if (single_value < 10) {
-            single_value += '0';
-         } else if (single_value < 36) {
-            single_value += 'A' - 10;
-         } else if (single_value < 62) {
-            single_value += 'a' - 36;
-         } else if (single_value == 62) {
-            single_value = '-';
-         } else {
-            single_value = '_';
-         }
-         string[i++] = single_value;
-         single_value = 0;
-         nr_bits = 0;
-      }
-      mask = mask / 2;
-      if (mask == 0) {
-         offset++;
-         mask = 0x80;
-      }
-   }
-   if (nr_bits > 0) {
-     while (nr_bits <= 5) {
-       single_value *= 2;
-       nr_bits++;
-     }
-     if (single_value < 10) {
-       single_value += '0';
-     } else if (single_value < 36) {
-       single_value += 'A' - 10;
-     } else if (single_value < 62) {
-       single_value += 'a' - 36;
-     } else if (single_value == 62) {
-       single_value = '-';
-     } else {
-       single_value = '_';
-     }
-     string[i++] = single_value;
-   }
-   string[i++] = '\0';
-   return string;
+    }
+    if (single_value < 10) {
+      single_value += '0';
+    } else if (single_value < 36) {
+      single_value += 'A' - 10;
+    } else if (single_value < 62) {
+      single_value += 'a' - 36;
+    } else if (single_value == 62) {
+      single_value = '-';
+    } else {
+      single_value = '_';
+    }
+    string[i++] = single_value;
+  }
+  string[i++] = '\0';
+  return string;
 }
 
 unsigned char *code_to_bytes(char *code, int *length) {
@@ -91,16 +91,16 @@ unsigned char *code_to_bytes(char *code, int *length) {
     while (value_mask) {
       outbuf[*length] = 2 * outbuf[*length];
       if (value & value_mask) {
-	outbuf[*length]++;
+        outbuf[*length]++;
       }
       outbits++;
       if (outbits == 8) {
-	(*length)++;
-	outbits = 0;
-	if (*length >= outbuflength) {
-	  printf("Out of memory in code_to_bytes: %d exceeds %d\n", *length, outbuflength);
-	  exit(0);
-	}
+        (*length)++;
+        outbits = 0;
+        if (*length >= outbuflength) {
+          printf("Out of memory in code_to_bytes: %d exceeds %d\n", *length, outbuflength);
+          exit(0);
+        }
       }
       value_mask /= 2;
     }
@@ -115,38 +115,38 @@ unsigned char *code_to_bytes(char *code, int *length) {
 }
 
 char *bitmap_to_code(Bitmap bm, int baseline) {
-   int i, j;
-   int height = bitmap_get_height(bm);
-   int width = bitmap_get_width(bm);
-   int nr_bits = height * width;
-   int nr_bytes = (nr_bits + 7) / 8;
+  int i, j;
+  int height = bitmap_get_height(bm);
+  int width = bitmap_get_width(bm);
+  int nr_bits = height * width;
+  int nr_bytes = (nr_bits + 7) / 8;
 
-   unsigned char *byte_data = malloc(nr_bytes + 3);
-   memset(byte_data, 0, nr_bytes + 3);
+  unsigned char *byte_data = malloc(nr_bytes + 3);
+  memset(byte_data, 0, nr_bytes + 3);
 
-   byte_data[0] = height;
-   byte_data[1] = width;
-   byte_data[2] = baseline;
+  byte_data[0] = height;
+  byte_data[1] = width;
+  byte_data[2] = baseline;
 
-   int offset = 3;
-   unsigned char mask = 0x80;
-   for (i = 0; i < height; i++) {
-      for (j = 0; j < width; j++) {
-         if (bitmap_get_bit(bm, j, i)) {
-            byte_data[offset] |= mask;
-         }
-         mask = mask / 2;
-         if (mask == 0) {
-            offset++;
-            mask = 0x80;
-         }
+  int offset = 3;
+  unsigned char mask = 0x80;
+  for (i = 0; i < height; i++) {
+    for (j = 0; j < width; j++) {
+      if (bitmap_get_bit(bm, j, i)) {
+        byte_data[offset] |= mask;
       }
-   }
+      mask = mask / 2;
+      if (mask == 0) {
+        offset++;
+        mask = 0x80;
+      }
+    }
+  }
 
-   char *code = bytes_to_code(byte_data, nr_bytes + 3);
-   free(byte_data);
+  char *code = bytes_to_code(byte_data, nr_bytes + 3);
+  free(byte_data);
 
-   return code;
+  return code;
 }
 
 Bitmap code_to_bitmap(char *code) {
@@ -237,21 +237,21 @@ int code_to_height(char *code) {
 // image row is to fill the minimal image from.
 int get_image_row_from_minimal_row(int nr, int x_height) {
   switch (nr) {
-  case 1: return x_height * 2;
-  case 2: return x_height * 1.75;
-  case 3: return x_height * 1.5;
-  case 4: return x_height * 1.25;
-  case 5: return x_height + 1;
-  case 6: return x_height - 1;
-  case 7: return x_height * 0.75;
-  case 8: return x_height * 0.5;
-  case 9: return x_height * 0.25;
-  case 10: return 0;
-  case 11: return -2;
-  case 12: return -(x_height * 0.25);
-  case 13: return -(x_height * 0.5);
-  case 14: return -(x_height * 0.75);
-  case 15: return -(x_height);
+    case 1: return x_height * 2;
+    case 2: return x_height * 1.75;
+    case 3: return x_height * 1.5;
+    case 4: return x_height * 1.25;
+    case 5: return x_height + 1;
+    case 6: return x_height - 1;
+    case 7: return x_height * 0.75;
+    case 8: return x_height * 0.5;
+    case 9: return x_height * 0.25;
+    case 10: return 0;
+    case 11: return -2;
+    case 12: return -(x_height * 0.25);
+    case 13: return -(x_height * 0.5);
+    case 14: return -(x_height * 0.75);
+    case 15: return -(x_height);
   }
   return 0;
 }
@@ -259,6 +259,7 @@ int get_image_row_from_minimal_row(int nr, int x_height) {
 // This is the inverse of the function above
 int get_minimal_row_from_image_row(int row, int x_height) {
   int minimal_row = 0;
+
   if (row <= x_height * 2) {
     minimal_row++;
   }
@@ -356,23 +357,23 @@ bool get_aggregate_bit(Bitmap bm, int col, int row) {
   for (i = (row - 1); i <= (row + 1); i++) {
     for (j = (col - 1); j <= (col + 1); j++) {
       if ((i >= 0) && (i < height) && (j >= 0) && (j < width)) {
-	if (bitmap_get_bit(bm, j, i)) {
-	  bits++;
-	  if (i == row) {
-	    bits++;
-	  }
-	  if (j == col) {
-	    bits++;
-	  }
-	}
-	bit_count++;
-	if (i == row) {
-	  bit_count++;
+        if (bitmap_get_bit(bm, j, i)) {
+          bits++;
+          if (i == row) {
+            bits++;
+          }
+          if (j == col) {
+            bits++;
+          }
+        }
+        bit_count++;
+        if (i == row) {
+          bit_count++;
 
-	}
-	if (j == col) {
-	  bit_count++;
-	}
+        }
+        if (j == col) {
+          bit_count++;
+        }
       }
     }
   }
@@ -381,16 +382,16 @@ bool get_aggregate_bit(Bitmap bm, int col, int row) {
 }
 
 /**
- * Create a new bitmap out of an existing one, reduced to "minimal"
- * size
- * @param bm: Bitmap to convert.
- * @param baseline: row inside (or outside) the [bm] bitmap that is considered
- *   the baseline for the font.
- * @param x_width: most common width in the font (width of "x" character)
- * @param x_height: height of the base part of the font (height of the "x"
- *   character).
- * @return Bitmap with a minimized version of the character.
- */
+* Create a new bitmap out of an existing one, reduced to "minimal"
+* size
+* @param bm: Bitmap to convert.
+* @param baseline: row inside (or outside) the [bm] bitmap that is considered
+*   the baseline for the font.
+* @param x_width: most common width in the font (width of "x" character)
+* @param x_height: height of the base part of the font (height of the "x"
+*   character).
+* @return Bitmap with a minimized version of the character.
+*/
 Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   Bitmap minimal_bm = bitmap_create();
 
@@ -428,41 +429,53 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
 
   // Now that we know how many columns to produce, map each column to
   // one or more columns in the original bitmap.
-
   if (x_width < width) {
     x_width = width;
   }
 
   int minimal_baseline = get_minimal_row_from_image_row(baseline, height);
   printf("# baseline=%d, x_height=%d, minimal_baseline=%d\n",
-	 baseline, x_height, minimal_baseline);
-
-  bitmap_set_baseline(minimal_bm, minimal_baseline);
+    baseline, x_height, minimal_baseline);
 
   int row = 0;
   float x_fraction;
   int i;
+
   for (i = 1; i <= 15; i++) {
     int image_row = get_image_row_from_minimal_row(i, x_height);
     int bm_row = get_bitmap_row_from_image_row(image_row, baseline);
-    if ((bm_row >= 0) && (bm_row < height)) {
-      // printf("  image_row=%d, bm_row=%d, row=%d\n", image_row, bm_row, row);
-      // bitmap row falls within the bitmap, so include it in the
-      // minimal bitmap as (row)
-      int col = 0;
-      for (x_fraction = 0.0; (x_fraction * (width - 1)) < width; x_fraction += (1.0 / (nr_cols - 1))) {
-	int bm_col = x_fraction * (width - 1);
-	// bm_col for an width=13 should be 0, 3, 6, 9, 12
-	if ((bm_col >= 0) && (bm_col < width)) {
-	  // printf("  bm_col=%d, col=%d, x_fraction=%f\n", bm_col, col, x_fraction);
-	  bitmap_set_bit(minimal_bm, col, row,
-			 get_aggregate_bit(bm, bm_col, bm_row));
-	}
-	col++;
+
+    if (bm_row <= baseline) {
+      // This bitmap row does not end up in the minimal bitmap, so move up
+      // the minimal baseline
+      minimal_baseline = row;
+    }
+
+    if (bm_row >= 0) {
+      if (bm_row < height) {
+        // printf("  image_row=%d, bm_row=%d, row=%d\n", image_row, bm_row, row);
+        // bitmap row falls within the bitmap, so include it in the
+        // minimal bitmap as (row)
+        int col = 0;
+        for (x_fraction = 0.0;
+          (x_fraction * (width - 1)) < width;
+          x_fraction += (1.0 / (nr_cols - 1))) {
+          int bm_col = x_fraction * (width - 1);
+          // bm_col for an width=13 should be 0, 3, 6, 9, 12
+          if ((bm_col >= 0) && (bm_col < width)) {
+            // printf("  bm_col=%d, col=%d, x_fraction=%f\n", bm_col, col, x_fraction);
+            bitmap_set_bit(minimal_bm, col, row,
+              get_aggregate_bit(bm, bm_col, bm_row));
+          }
+          col++;
+        }
       }
       row++;
     }
   }
+
+  printf("Minimal baseline becomes %d\n", minimal_baseline);
+  bitmap_set_baseline(minimal_bm, minimal_baseline);
 
   return minimal_bm;
 }
@@ -479,26 +492,26 @@ void dump_bitmap(Bitmap bm) {
       memset(data, 0, width + 1);
       int rows = height;
       if (baseline > -999) {
-	if (baseline >= rows) {
-	  rows = baseline + 1;
-	}
+        if (baseline >= rows) {
+          rows = baseline + 1;
+        }
       }
       for (y = 0; y < rows; y++) {
-	int x = 0;
-	for (x = 0; x < width; x++) {
-	  if (y < height) {
-	    data[x] = bitmap_get_bit(bm, x, y) ? 'X' : '.';
-	  } else {
-	    data[x] = ' ';
-	  }
-	}
-	printf("# %02d %s\n", y, data);
-	if (y == baseline) {
-	  for (x = 0; x < width; x++) {
-	    data[x] = '-';
-	  }
-	  printf("#    %s\n", data);
-	}
+        int x = 0;
+        for (x = 0; x < width; x++) {
+          if (y < height) {
+            data[x] = bitmap_get_bit(bm, x, y) ? 'X' : '.';
+          } else {
+            data[x] = ' ';
+          }
+        }
+        printf("# %02d %s\n", y, data);
+        if (y == baseline) {
+          for (x = 0; x < width; x++) {
+            data[x] = '-';
+          }
+          printf("#    %s\n", data);
+        }
       }
       free(data);
     }
@@ -510,11 +523,11 @@ void dump_code(char *string) {
   unsigned char *buffer = code_to_bytes(string, &length);
 
   if (length < 3) {
-    // We need to get at least 3 bytes of data back with height, width and
-    // baseline. If there are fewer than 3 bytes of data in the buffer,
-    // we can't continue.
+// We need to get at least 3 bytes of data back with height, width and
+// baseline. If there are fewer than 3 bytes of data in the buffer,
+// we can't continue.
     printf("dump_string(): Decoded data is too short (%d, should be at least 4 bytes)\n",
-	   length);
+      length);
     exit(0);
   }
 
@@ -524,16 +537,16 @@ void dump_code(char *string) {
 
   printf("# Start of character dump baseline %d\n", baseline);
   printf("# (0, 0) to (%d, %d): %d wide, %d high\n",
-	 width-1, height-1, width, height);
+    width-1, height-1, width, height);
 
-  // Based on width and height, determine the total number of bits we have
-  // to process, and make sure they are all there in the data
+// Based on width and height, determine the total number of bits we have
+// to process, and make sure they are all there in the data
   int nr_bits = width * height;
   if (length < (nr_bits + 7) / 8 + 3) {
-    // Not enough bytes in the buffer to accomodate all the bits that make
-    // up the character. Give an error and some debug info.
+// Not enough bytes in the buffer to accomodate all the bits that make
+// up the character. Give an error and some debug info.
     printf("Got %d chars, expecting %d. Decoded string:\n",
-	   length, (nr_bits + 7) / 8 + 3);
+      length, (nr_bits + 7) / 8 + 3);
     int i;
     for (i = 0; i < length; i++) {
       printf("0x%02X ", buffer[i]);
@@ -542,7 +555,7 @@ void dump_code(char *string) {
     exit(0);
   }
 
-  // Know that the buffer has enough data, start peeling bits off
+// Know that the buffer has enough data, start peeling bits off
   int row = 0;
   int col = 0;
   int ptr = 3;
@@ -570,12 +583,12 @@ void dump_code(char *string) {
       col = 0;
       printf("\n");
       if (row == (baseline + 1)) {
-	printf("------");
-	int j;
-	for (j = 0; j < width; j++) {
-	  printf("-");
-	}
-	printf("\n");
+        printf("------");
+        int j;
+        for (j = 0; j < width; j++) {
+          printf("-");
+        }
+        printf("\n");
       }
     }
   }

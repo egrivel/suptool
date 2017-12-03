@@ -79,13 +79,13 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  minlist_read("minimal.data");
+  minlist_read("template.data");
 
   for (i = 1; i < argc; i++) {
     read_file(argv[i]);
   }
 
-  minlist_write("minimal.data");
+  minlist_write("template.data");
 
   return 0;
 }
