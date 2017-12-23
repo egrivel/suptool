@@ -12,7 +12,7 @@ bool gl_debug = false;
 int gl_debug_subtitle = -1;
 int gl_debug_block = -1;
 int gl_cur_subtitle = 0;
-int gl_format = FORMAT_SRT;
+int gl_format = FORMAT_ASS;
 int gl_normal_space_width = 0;
 int gl_italic_space_width = 0;
 
@@ -97,7 +97,7 @@ void five_most_frequent_widths() {
   printf("# Five most frequent widths and heights in the file:\n");
   for (i = 0; i < 5; i++) {
     printf("# width %d occurs %d times\n", w_freq[i], widths[w_freq[i]]);
-    printf("# height %d occurs %d times\n", h_freq[i], widths[h_freq[i]]);
+    printf("# height %d occurs %d times\n", h_freq[i], heights[h_freq[i]]);
   }
 }
 
@@ -1272,6 +1272,10 @@ int main(int argc, char *argv[]) {
             gl_debug = true;
          } else if (!strcmp(argv[i], "-a")) {
             gl_format = FORMAT_ASS;
+         } else if (!strcmp(argv[i], "-A")) {
+            gl_format = FORMAT_ASS;
+         } else if (!strcmp(argv[i], "-S")) {
+            gl_format = FORMAT_SRT;
          } else if (!strcmp(argv[i], "-b")) {
             i++;
             if (i < argc) {
