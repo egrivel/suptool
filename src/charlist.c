@@ -167,6 +167,10 @@ void read_char_data(char *fname) {
                value_end++;
             }
             value_end--;
+            while ((value_end > value_start) && (buffer[value_end] == ' ')) {
+              // strip trailing spaces
+              value_end--;
+            }
 
             buffer[code_end + 1] = '\0';
             buffer[type_end + 1] = '\0';

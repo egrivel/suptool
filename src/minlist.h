@@ -3,9 +3,8 @@
 
 void minlist_add(char *code, char *string, int style);
 
-int minlist_get_count(char *code);
-char *minlist_get_char(char *code, int count);
-int minlist_get_style(char *code, int count);
+char *minlist_get_string(char *code);
+int minlist_get_style(char *code);
 
 void minlist_write(char *fname);
 void minlist_read(char *fname);

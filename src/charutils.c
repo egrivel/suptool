@@ -521,9 +521,9 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   int width = bitmap_get_width(bm);
   int height = bitmap_get_height(bm);
 
-  printf("# Creating minimal bitmap\n");
-  printf("#   baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
-  printf("#   width=%d, height=%d\n", width, height);
+  // printf("# Creating minimal bitmap\n");
+  // printf("#   baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
+  // printf("#   width=%d, height=%d\n", width, height);
 
   // The minimal bitmap would sample the letter "x" as a 5x5 pattern.
   // So use as horizontal sampling:
@@ -548,7 +548,7 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
     nr_cols++;
     frac += 0.25;
   }
-  printf("# Calculated number of columns: %d\n", nr_cols);
+  // printf("# Calculated number of columns: %d\n", nr_cols);
 
   // Now that we know how many columns to produce, map each column to
   // one or more columns in the original bitmap.
@@ -557,8 +557,8 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   }
 
   int minimal_baseline = get_minimal_row_from_image_row(baseline, height);
-  printf("# baseline=%d, x_height=%d, minimal_baseline=%d\n",
-    baseline, x_height, minimal_baseline);
+  // printf("# baseline=%d, x_height=%d, minimal_baseline=%d\n",
+  //   baseline, x_height, minimal_baseline);
 
   int row = 0;
   float x_fraction;
@@ -597,7 +597,7 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
     }
   }
 
-  printf("Minimal baseline becomes %d\n", minimal_baseline);
+  // printf("# Minimal baseline becomes %d\n", minimal_baseline);
   bitmap_set_baseline(minimal_bm, minimal_baseline);
 
   return minimal_bm;
@@ -609,9 +609,9 @@ Bitmap bitmap_to_medium(Bitmap bm, int baseline, int x_width, int x_height) {
   int width = bitmap_get_width(bm);
   int height = bitmap_get_height(bm);
 
-  printf("# Creating medium bitmap\n");
-  printf("#   baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
-  printf("#   width=%d, height=%d\n", width, height);
+  // printf("# Creating medium bitmap\n");
+  // printf("#   baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
+  // printf("#   width=%d, height=%d\n", width, height);
 
   // The minimal bitmap would sample the letter "x" as a 9x0 pattern.
   // So use as horizontal sampling:
@@ -640,7 +640,7 @@ Bitmap bitmap_to_medium(Bitmap bm, int baseline, int x_width, int x_height) {
     nr_cols++;
     frac += 0.125;
   }
-  printf("# Calculated number of columns: %d\n", nr_cols);
+  // printf("# Calculated number of columns: %d\n", nr_cols);
 
   // Now that we know how many columns to produce, map each column to
   // one or more columns in the original bitmap.
@@ -649,8 +649,8 @@ Bitmap bitmap_to_medium(Bitmap bm, int baseline, int x_width, int x_height) {
   }
 
   int medium_baseline = get_medium_row_from_image_row(baseline, height);
-  printf("# baseline=%d, x_height=%d, minimal_baseline=%d\n",
-    baseline, x_height, medium_baseline);
+  // printf("# baseline=%d, x_height=%d, minimal_baseline=%d\n",
+  //   baseline, x_height, medium_baseline);
 
   int row = 0;
   float x_fraction;
@@ -688,7 +688,7 @@ Bitmap bitmap_to_medium(Bitmap bm, int baseline, int x_width, int x_height) {
     }
   }
 
-  printf("Medium baseline becomes %d\n", medium_baseline);
+  // printf("# Medium baseline becomes %d\n", medium_baseline);
   bitmap_set_baseline(medium_bm, medium_baseline);
 
   return medium_bm;

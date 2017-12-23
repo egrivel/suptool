@@ -28,7 +28,7 @@ void read_file(char *fname) {
   int x_width = bitmap_get_width(default_bm);
   int x_height = bitmap_get_height(default_bm);
   bitmap_destroy(default_bm);
-  printf("Got x_width=%d, x_height=%d\n", x_width, x_height);
+  // printf("Got x_width=%d, x_height=%d\n", x_width, x_height);
 
   int nr_entries = charlist_nr_entries();
   int i;
@@ -36,25 +36,25 @@ void read_file(char *fname) {
     char *code = charlist_get_code(i);
     // printf("Got code %s\n", code);
     char *string = get_char_string(code);
-    char *style = charlist_get_style_name(code);
+    // char *style = charlist_get_style_name(code);
     int style_value = charlist_get_style(code);
     Bitmap bm = code_to_bitmap(code);
     int baseline = code_to_baseline(code);
     bitmap_set_baseline(bm, baseline);
 
     if (strlen(string) < 10) {
-      printf("Starting with this bitmap:\n");
-      dump_bitmap(bm);
+      // printf("Starting with this bitmap:\n");
+      // dump_bitmap(bm);
 
       Bitmap minimal_bm = bitmap_to_minimal(bm, baseline, x_width, x_height);
 
       // printf("\nresulting in this minimal bitmap:\n");
-      dump_bitmap(minimal_bm);
+      // dump_bitmap(minimal_bm);
       char *minimal_code = bitmap_to_code(minimal_bm,
           bitmap_get_baseline(minimal_bm));;
-      printf("%s.ch = %s\n", minimal_code, string);
-      printf("%s.style = %s\n", minimal_code, style);
-      printf("\n\n");
+      // printf("%s.ch = %s\n", minimal_code, string);
+      // printf("%s.style = %s\n", minimal_code, style);
+      // printf("\n\n");
 
       minlist_add(minimal_code, string, style_value);
 
@@ -68,12 +68,12 @@ void read_file(char *fname) {
       Bitmap medium_bm = bitmap_to_medium(bm, baseline, x_width, x_height);
 
       // printf("\nresulting in this medium bitmap:\n");
-      dump_bitmap(medium_bm);
+      // dump_bitmap(medium_bm);
       char *medium_code = bitmap_to_code(medium_bm,
           bitmap_get_baseline(medium_bm));;
-      printf("%s.ch = %s\n", medium_code, string);
-      printf("%s.style = %s\n", medium_code, style);
-      printf("\n\n");
+      // printf("%s.ch = %s\n", medium_code, string);
+      // printf("%s.style = %s\n", medium_code, style);
+      // printf("\n\n");
 
       minlist_add(medium_code, string, style_value);
 

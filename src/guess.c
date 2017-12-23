@@ -7,6 +7,55 @@
 #define MAX_WIDTH 128
 #define MAX_HEIGHT 128
 
+void make_guess(char *code, int x_width, int x_height) {
+  Bitmap bm = code_to_bitmap(code);
+  int baseline = code_to_baseline(code);
+  bitmap_set_baseline(bm, baseline);
+
+
+  Bitmap medium_bm = bitmap_to_medium(bm, baseline, x_width, x_height);
+  char *medium_code = bitmap_to_code(medium_bm,
+    bitmap_get_baseline(medium_bm));
+  char *string = minlist_get_string(medium_code);
+  int style = minlist_get_style(medium_code);
+  bitmap_destroy(medium_bm);
+
+  if (string == NULL) {
+    // Didn't find it in medium, try minimal
+    Bitmap minimal_bm = bitmap_to_minimal(bm, baseline, x_width, x_height);
+    char *minimal_code = bitmap_to_code(minimal_bm,
+      bitmap_get_baseline(minimal_bm));
+    string = minlist_get_string(minimal_code);
+    style = minlist_get_style(minimal_code);
+    bitmap_destroy(minimal_bm);
+  }
+
+  if (string == NULL) {
+    string = "";
+  }
+
+  // Check for the number of spaces in the string. Normally, there will be
+  // two spaces (one before the letter, one after). If there are more than
+  // two spaces, the template wasn't conclusive. In that case, change the
+  // style back to "unknown" to indicate that this entry must still be
+  // looked at.
+  int space_count, i;
+  space_count = 0;
+  for (i = 0; string[i]; i++) {
+    if (string[i] == ' ') {
+      space_count++;
+    }
+  }
+  if (space_count > 2) {
+    style = 0;
+  }
+
+  printf("%s.ch = %s\n", code, string);
+  printf("%s.style = %s\n", code, get_style_name(style));
+
+  bitmap_destroy(bm);
+}
+
 void process_file(char *fname, int width, int height) {
   static char buffer[16384];
   strcpy(buffer, "");
@@ -64,6 +113,10 @@ void process_file(char *fname, int width, int height) {
           value_end++;
         }
         value_end--;
+        while ((value_end > value_start) && (buffer[value_end] == ' ')) {
+          // strip trailing spaces
+          value_end--;
+        }
 
         buffer[code_end + 1] = '\0';
         buffer[type_end + 1] = '\0';
@@ -75,11 +128,12 @@ void process_file(char *fname, int width, int height) {
             printf("%s.ch = %s\n", &buffer[code_start], &buffer[value_start]);
           } else {
             // need to guess
+            make_guess(&buffer[code_start], width, height);
           }
           // CharItem *item = get_add_item(&buffer[code_start]);
           // item->string = strdup(&buffer[value_start]);
         } else if (!strcmp(&buffer[type_start], "style")) {
-          if (!strcmp(&buffer[value_start], "unknown")) {
+          if (strcmp(&buffer[value_start], "unknown")) {
             // already has a type
             printf("%s.style = %s\n", &buffer[code_start], &buffer[value_start]);
           } else {
@@ -122,107 +176,6 @@ void process_file(char *fname, int width, int height) {
     }
   }
   fclose(fin);
-
-
-  int width_counts[MAX_WIDTH];
-  memset(width_counts, 0, MAX_WIDTH * sizeof(int));
-  int height_counts[MAX_HEIGHT];
-  memset(height_counts, 0, MAX_HEIGHT * sizeof(int));
-
-  read_char_data(fname);
-
-  int nr_entries = charlist_nr_entries();
-
-  int i;
-  for (i = 0; i < nr_entries; i++) {
-    char *code = charlist_get_code(i);
-    int width = code_to_width(code);
-    int height = code_to_height(code);
-    printf("Code %s\n", code);
-    printf("Got width=%d, height=%d\n", width, height);
-    if ((width > 0) && (width < MAX_WIDTH)) {
-      width_counts[width]++;
-    }
-    if ((height > 0) && (height < MAX_HEIGHT)) {
-      height_counts[height]++;
-    }
-  }
-
-  int common_width = 0;
-  int common_height = 0;
-
-  for (i = 0; i < MAX_WIDTH; i++) {
-    if (width_counts[i] > width_counts[common_width]) {
-      common_width = i;
-    }
-  }
-
-  for (i = 0; i < MAX_HEIGHT; i++) {
-    if (height_counts[i] > height_counts[common_height]) {
-      common_height = i;
-    }
-  }
-
-  printf("File %s: got common width=%d, height=%d\n",
-    fname, common_width, common_height);
-  // // In order to determine the most common width and height in a
-  // // subtitle file, go with the lowercase letter "x" for a pretty
-  // char *code = charlist_find_by_string("x", STYLE_NORMAL);
-  // if (code == NULL) {
-  //   printf("Cannot find reference character 'x'\n");
-  //   return;
-  // }
-
-  // Bitmap default_bm = code_to_bitmap(code);
-  // int x_width = bitmap_get_width(default_bm);
-  // int x_height = bitmap_get_height(default_bm);
-  // bitmap_destroy(default_bm);
-  // printf("Got x_width=%d, x_height=%d\n", x_width, x_height);
-
-  // int nr_entries = charlist_nr_entries();
-  // int i;
-  // for (i = 0; i < nr_entries; i++) {
-  //   char *code = charlist_get_code(i);
-  //   // printf("Got code %s\n", code);
-  //   char *string = get_char_string(code);
-  //   char *style = charlist_get_style_name(code);
-  //   int style_value = charlist_get_style(code);
-  //   Bitmap bm = code_to_bitmap(code);
-  //   int baseline = code_to_baseline(code);
-  //   bitmap_set_baseline(bm, baseline);
-
-  //   if (strlen(string) < 10) {
-  //     printf("Starting with this bitmap:\n");
-  //     dump_bitmap(bm);
-
-  //     Bitmap minimal_bm = bitmap_to_minimal(bm, baseline, x_width, x_height);
-
-  //     // printf("\nresulting in this minimal bitmap:\n");
-  //     dump_bitmap(minimal_bm);
-  //     char *minimal_code = bitmap_to_code(minimal_bm,
-  //         bitmap_get_baseline(minimal_bm));;
-  //     printf("%s.ch = %s\n", minimal_code, string);
-  //     printf("%s.style = %s\n", minimal_code, style);
-  //     printf("\n\n");
-
-  //     minlist_add(minimal_code, string, style_value);
-
-  //     // int minimal_baseline = 0;
-  //     // char *minimal_code = bitmap_to_code(minimal, minimal_baseline);
-  //     // printf("Got '%s'\n", minimal_code);
-  //     // free(minimal_code);
-
-  //     bitmap_destroy(minimal_bm);
-  //   }
-
-  //   bitmap_destroy(bm);
-  // }
-
-  // char *buffer = malloc(strlen(fname) + strlen(".out") + 1);
-  // strcpy(buffer, fname);
-  // strcat(buffer, ".out");;
-  // write_char_data(buffer);
-  // charlist_reset();
 }
 
 int main(int argc, char *argv[]) {

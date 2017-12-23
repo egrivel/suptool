@@ -27,6 +27,22 @@ MinItem *minlist_find(char *code) {
   return NULL;
 }
 
+char *minlist_get_string(char *code) {
+  MinItem *item = minlist_find(code);
+  if (item) {
+    return item->string;
+  }
+  return NULL;
+}
+
+int minlist_get_style(char *code) {
+  MinItem *item = minlist_find(code);
+  if (item) {
+    return item->style;
+  }
+  return STYLE_UNKNOWN;
+}
+
 void minlist_add_string_to_item(MinItem *item, char *string, int style) {
   if (item->style != style) {
     item->style = STYLE_EITHER;
