@@ -41,11 +41,13 @@ typedef struct {
 
 #define MAX_WIDTH 100
 int widths[MAX_WIDTH];
+int heights[MAX_WIDTH];
 
 void init_widths() {
-  int i;;
+  int i;
   for (i = 0; i < MAX_WIDTH; i++) {
     widths[i] = 0;
+    heights[i] = 0;
   }
 }
 
@@ -55,30 +57,47 @@ void set_width(int w) {
   }
 }
 
+void set_height(int h) {
+  if ((h > 0) && (h < MAX_WIDTH)) {
+    heights[h]++;
+  }
+}
+
 void five_most_frequent_widths() {
-  int freq[5];
+  int w_freq[5];
+  int h_freq[5];
 
   int i, j;
   for (i = 0; i < 5; i++) {
-    int max = 0;
+    int w_max = 0;
+    int h_max = 0;
     for (j = 0; j < MAX_WIDTH; j++) {
       int k;
-      bool skip = false;
+      bool w_skip = false;
+      bool h_skip = false;
       for (k = 0; k < i; k++) {
-      	if (freq[k] == j) {
-      	  skip = true;
+      	if (w_freq[k] == j) {
+      	  w_skip = true;
       	}
+        if (h_freq[k] == j) {
+          h_skip = true;
+        }
       }
-      if (!skip && widths[j] >= widths[max]) {
-      	max = j;
+      if (!w_skip && widths[j] >= widths[w_max]) {
+      	w_max = j;
+      }
+      if (!h_skip && heights[j] >= heights[h_max]) {
+        h_max = j;
       }
     }
-    freq[i] = max;
+    w_freq[i] = w_max;
+    h_freq[i] = h_max;
   }
 
-  printf("# Five most frequent widths in the file:\n");
+  printf("# Five most frequent widths and heights in the file:\n");
   for (i = 0; i < 5; i++) {
-    printf("# width %d occurs %d times\n", freq[i], widths[freq[i]]);
+    printf("# width %d occurs %d times\n", w_freq[i], widths[w_freq[i]]);
+    printf("# height %d occurs %d times\n", h_freq[i], widths[h_freq[i]]);
   }
 }
 
@@ -534,6 +553,7 @@ void process_single_char(Bitmap bm, int block_height, int block_width,
                          int baseline, int alt_base1, int alt_base2,
                          int nr_try, char *fname, bool debug) {
   set_width(block_width);
+  set_height(block_height);
 
    int bases[15];
    bases[0] = baseline;
@@ -1239,8 +1259,11 @@ int main(int argc, char *argv[]) {
    //  -a           output .ass rather than .srt
    //  -b <nr>      debug block number <nr>
    //  -s <nr>      debug subtitle <nr>
+   //  -d           turn global debugging on
    //  -is <nr>     use <nr> as minimal size for italic space
    //  -in <nr>     use <nr> as minimal size for normal space
+   //  -ths <nr>    use <nr> as threshold (dividing line between foreground
+   //               and background color in the subtitle bitmap)
    //  <filename>   process file <filename>
    if (argc > 0) {
       int i;
