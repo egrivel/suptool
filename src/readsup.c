@@ -65,12 +65,12 @@ void five_most_frequent_widths() {
       int k;
       bool skip = false;
       for (k = 0; k < i; k++) {
-	if (freq[k] == j) {
-	  skip = true;
-	}
+      	if (freq[k] == j) {
+      	  skip = true;
+      	}
       }
       if (!skip && widths[j] >= widths[max]) {
-	max = j;
+      	max = j;
       }
     }
     freq[i] = max;
@@ -902,9 +902,9 @@ void process_char(Bitmap bm, int line_start, int line_end, int baseline, int alt
 
          if (debug) {
             printf("Got new block:\n");
-	    dump_bitmap(temp_bm);
+      	    dump_bitmap(temp_bm);
             printf("Old block has become:\n");
-	    dump_bitmap(new_bm);
+      	    dump_bitmap(new_bm);
          }
 
          // Process the first new character
@@ -1140,7 +1140,7 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
          printf("      base=%d, asc=%d, desc=%d, alt_base1=%d, alt_base2=%d\n",
                 sizes->base_height, sizes->ascender_height, sizes->descender_height,
                 alt_base1, alt_base2);
-	 dump_bitmap(subtitle_bitmap(sbt));
+      	 dump_bitmap(subtitle_bitmap(sbt));
          // dump_char(subtitle_bitmap(sbt), line_start, line_end, 0, subtitle_get_width(sbt));
       }
 

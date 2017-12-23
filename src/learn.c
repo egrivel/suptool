@@ -64,6 +64,25 @@ void read_file(char *fname) {
       // free(minimal_code);
 
       bitmap_destroy(minimal_bm);
+
+      Bitmap medium_bm = bitmap_to_medium(bm, baseline, x_width, x_height);
+
+      // printf("\nresulting in this medium bitmap:\n");
+      dump_bitmap(medium_bm);
+      char *medium_code = bitmap_to_code(medium_bm,
+          bitmap_get_baseline(medium_bm));;
+      printf("%s.ch = %s\n", medium_code, string);
+      printf("%s.style = %s\n", medium_code, style);
+      printf("\n\n");
+
+      minlist_add(medium_code, string, style_value);
+
+      // int medium_baseline = 0;
+      // char *medium_code = bitmap_to_code(medium, medium_baseline);
+      // printf("Got '%s'\n", medium_code);
+      // free(medium_code);
+
+      bitmap_destroy(medium_bm);
     }
 
     bitmap_destroy(bm);

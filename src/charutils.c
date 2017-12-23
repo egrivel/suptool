@@ -185,6 +185,7 @@ Bitmap code_to_bitmap(char *code) {
     nr_bits--;
   }
 
+  free(bytes);
   return bm;
 }
 
@@ -300,6 +301,128 @@ int get_minimal_row_from_image_row(int row, int x_height) {
     minimal_row++;
   }
   if (row <= -(x_height * 0.75)) {
+    minimal_row++;
+  }
+  if (row <= -x_height) {
+    minimal_row++;
+  }
+
+  return minimal_row;
+}
+
+int get_image_row_from_medium_row(int nr, int x_height) {
+  switch (nr) {
+    case 1: return x_height * 2;
+    case 2: return x_height * 1.875;
+    case 3: return x_height * 1.75;
+    case 4: return x_height * 1.625;
+    case 5: return x_height * 1.5;
+    case 6: return x_height * 1.375;
+    case 7: return x_height * 1.25;
+    case 8: return x_height * 1.125;
+    case 9: return x_height + 1;
+    case 10: return x_height - 1;
+    case 11: return x_height * 0.875;
+    case 12: return x_height * 0.75;
+    case 13: return x_height * 0.625;
+    case 14: return x_height * 0.5;
+    case 15: return x_height * 0.375;
+    case 16: return x_height * 0.25;
+    case 17: return x_height * 0.125;
+    case 18: return 0;
+    case 19: return -2;
+    case 20: return -(x_height * 0.125);
+    case 21: return -(x_height * 0.25);
+    case 22: return -(x_height * 0.375);
+    case 23: return -(x_height * 0.5);
+    case 24: return -(x_height * 0.625);
+    case 25: return -(x_height * 0.75);
+    case 26: return -(x_height * 0.875);
+    case 27: return -(x_height);
+  }
+  return 0;
+}
+
+// This is the inverse of the function above
+int get_medium_row_from_image_row(int row, int x_height) {
+  int minimal_row = 0;
+
+  if (row <= x_height * 2) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.875)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.75)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.625)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.50)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.375)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.25)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 1.125)) {
+    minimal_row++;
+  }
+  if (row <= (x_height + 1)) {
+    minimal_row++;
+  }
+  if (row <= (x_height - 1)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.875)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.75)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.625)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.50)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.375)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.25)) {
+    minimal_row++;
+  }
+  if (row <= (x_height * 0.125)) {
+    minimal_row++;
+  }
+  if (row <= 0) {
+    minimal_row++;
+  }
+  if (row <= -2) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.125)) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.25)) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.375)) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.50)) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.625)) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.75)) {
+    minimal_row++;
+  }
+  if (row <= -(x_height * 0.875)) {
     minimal_row++;
   }
   if (row <= -x_height) {
@@ -478,6 +601,97 @@ Bitmap bitmap_to_minimal(Bitmap bm, int baseline, int x_width, int x_height) {
   bitmap_set_baseline(minimal_bm, minimal_baseline);
 
   return minimal_bm;
+}
+
+Bitmap bitmap_to_medium(Bitmap bm, int baseline, int x_width, int x_height) {
+  Bitmap medium_bm = bitmap_create();
+
+  int width = bitmap_get_width(bm);
+  int height = bitmap_get_height(bm);
+
+  printf("# Creating medium bitmap\n");
+  printf("#   baseline=%d, x_width=%d, x_height=%d\n", baseline, x_width, x_height);
+  printf("#   width=%d, height=%d\n", width, height);
+
+  // The minimal bitmap would sample the letter "x" as a 9x0 pattern.
+  // So use as horizontal sampling:
+  //  - column 0 * (x_width - 1)
+  //  - column 0.125 * (x_width - 1)
+  //  - column 0.25 * (x_width - 1)
+  //  - column 0.375 * (x_width - 1)
+  //  - column 0.50 * (x_width - 1)
+  //  - column 0.625 * (x_width - 1)
+  //  - column 0.75 * (x_width - 1)
+  //  - column 0.875 * (x_width - 1)
+  //  - column 1.00 * (x_width - 1);
+
+  // To figure out sampling, we want to first determine how many columns the
+  // sample should be.
+  //  - if the current width is between 7/8 and 9/8 of x_width, it is five
+  //  - if the current width is between 5/8 and 7/8 of x_width, it is four
+  //  - if the current width is between 3/8 and 5/8 of x_width, it is three
+  //  - if the current width is between 1/8 and 3/8 of x_width, it is two
+  //  - if the current width is between 0 and 1/8 of x_width, it is one
+  //  - if the current width is between 9/8 and 11/8 of x_width, it is six
+  // all values are exclusive on the left, inclusive on the right
+  int nr_cols = 1;
+  float frac = 0.0625;
+  while (width > (frac * x_width)) {
+    nr_cols++;
+    frac += 0.125;
+  }
+  printf("# Calculated number of columns: %d\n", nr_cols);
+
+  // Now that we know how many columns to produce, map each column to
+  // one or more columns in the original bitmap.
+  if (x_width < width) {
+    x_width = width;
+  }
+
+  int medium_baseline = get_medium_row_from_image_row(baseline, height);
+  printf("# baseline=%d, x_height=%d, minimal_baseline=%d\n",
+    baseline, x_height, medium_baseline);
+
+  int row = 0;
+  float x_fraction;
+  int i;
+
+  for (i = 1; i <= 27; i++) {
+    int image_row = get_image_row_from_medium_row(i, x_height);
+    int bm_row = get_bitmap_row_from_image_row(image_row, baseline);
+
+    if (bm_row <= baseline) {
+      // This bitmap row does not end up in the minimal bitmap, so move up
+      // the minimal baseline
+      medium_baseline = row;
+    }
+
+    if (bm_row >= 0) {
+      if (bm_row < height) {
+        // printf("  image_row=%d, bm_row=%d, row=%d\n", image_row, bm_row, row);
+        // bitmap row falls within the bitmap, so include it in the
+        // minimal bitmap as (row)
+        int col = 0;
+        for (x_fraction = 0.0;
+          (x_fraction * (width - 1)) < width;
+          x_fraction += (1.0 / (nr_cols - 1))) {
+          int bm_col = x_fraction * (width - 1);
+          if ((bm_col >= 0) && (bm_col < width)) {
+            // printf("  bm_col=%d, col=%d, x_fraction=%f\n", bm_col, col, x_fraction);
+            bitmap_set_bit(medium_bm, col, row,
+              get_aggregate_bit(bm, bm_col, bm_row));
+          }
+          col++;
+        }
+      }
+      row++;
+    }
+  }
+
+  printf("Medium baseline becomes %d\n", medium_baseline);
+  bitmap_set_baseline(medium_bm, medium_baseline);
+
+  return medium_bm;
 }
 
 void dump_bitmap(Bitmap bm) {

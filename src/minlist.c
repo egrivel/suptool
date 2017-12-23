@@ -32,7 +32,7 @@ void minlist_add_string_to_item(MinItem *item, char *string, int style) {
     item->style = STYLE_EITHER;
   }
 
-  printf("Code %s: look for '%s' in '%s'\n", item->code, string, item->string);
+  // printf("Code %s: look for '%s' in '%s'\n", item->code, string, item->string);
   // create a buffer large enough for the new item->string if we need it
   char *buffer = malloc(strlen(item->string) + strlen(string) + 3);
   strcpy(buffer, SEPARATOR);
@@ -40,7 +40,7 @@ void minlist_add_string_to_item(MinItem *item, char *string, int style) {
   strcat(buffer, SEPARATOR);
   if (strstr(item->string, buffer)) {
     // string is already in there, nothing left to do
-    printf("   already exists\n");
+    // printf("   already exists\n");
     free(buffer);
     return;;
   }
@@ -53,7 +53,7 @@ void minlist_add_string_to_item(MinItem *item, char *string, int style) {
   // destroy the old version
   free(item->string);;
   item->string = buffer;
-  printf("   added: '%s'\n", item->string);
+  // printf("   added: '%s'\n", item->string);
 }
 
 void minlist_add(char *code, char *string, int style) {
@@ -86,7 +86,7 @@ void minlist_add(char *code, char *string, int style) {
     minlist_items++;
   }
 
-  printf("Item %d becomes '%s'\n", minlist_items - 1, minlist[minlist_items - 1].string);
+  // printf("Item %d becomes '%s'\n", minlist_items - 1, minlist[minlist_items - 1].string);
 }
 
 void minlist_write(char *fname) {

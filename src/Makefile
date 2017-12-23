@@ -1,10 +1,26 @@
-all: readsup decode_base string_to_char learn
+#
+# General targets (all, clean)
+#
+
+all: readsup decode_base string_to_char learn guess
 
 clean:
-	rm readsup decode_base string_to_char *.o
+	rm readsup decode_base string_to_char learn guess *.o
+
+#
+# Executables
+#
 
 readsup: readsup.o subformat.o supformat.o common.o subtitle.o charlist.o \
 		output.o subprop.o bitmap.o charutils.o util.o process.o
+	gcc -o $@ $^
+
+learn: learn.o common.o charlist.o charutils.o subprop.o bitmap.o util.o \
+	process.o minlist.o
+	gcc -o $@ $^
+
+guess: guess.o common.o charlist.o charutils.o subprop.o bitmap.o util.o \
+	process.o minlist.o
 	gcc -o $@ $^
 
 decode_base: decode_base.o common.o charutils.o bitmap.o subprop.o util.o
@@ -13,9 +29,9 @@ decode_base: decode_base.o common.o charutils.o bitmap.o subprop.o util.o
 string_to_char: string_to_char.o common.o charutils.o bitmap.o subprop.o util.o
 	gcc -o $@ $^
 
-learn: learn.o common.o charlist.o charutils.o subprop.o bitmap.o util.o \
-	process.o minlist.o
-	gcc -o $@ $^
+#
+# Modules / objects
+#
 
 common.o: common.c common.h
 	gcc -c -Wall common.c
@@ -65,3 +81,5 @@ util.o: util.c common.h util.h
 learn.o: learn.c common.h charlist.h
 	gcc -c -Wall learn.c
 
+guess.o: guess.c common.h charlist.h
+	gcc -c -Wall guess.c

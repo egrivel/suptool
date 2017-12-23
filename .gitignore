@@ -3,6 +3,7 @@ subtitles
 testdata
 SubToSup
 readsup
+guess
 decode_base
 learn
 string_to_char

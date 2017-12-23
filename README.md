@@ -75,6 +75,18 @@ to how characters are stored in the `readsup.data` file.
 
 ---
 
+## learn tool ##
+
+Process an existing data file and create a `template.data` file from it.
+The `template.data` file contains patterns used to match unknown character
+to new ones.
+
+The template data is created by taking each character that has previously
+been recognized and reducing it to two sizes, a "minimal" and a "medium"
+size. The idea is that, with this template data, any new bitmap found
+in a subtitle, when reduced to the same size, is likely to match a
+template and therefore can be recognized.
+
 ## Source Code ##
 
 The following describes the different source code modules, from the bottom

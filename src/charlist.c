@@ -234,6 +234,17 @@ void read_char_data(char *fname) {
    */
 }
 
+void write_char_data(char *fname) {
+  FILE *fp = fopen(fname, "wt");
+  int i;
+  for (i = 0; i < nr_chars; i++) {
+    fprintf(fp, "%s.ch = %s\n", charlist[i].code, charlist[i].string);
+    fprintf(fp, "%s.style = %s\n", charlist[i].code,
+      get_style_name(charlist[i].style));
+  }
+  fclose(fp);;
+}
+
 #define INIT_SIZE 16
 struct bit_data {
    unsigned char *data;
