@@ -232,6 +232,8 @@ int main(int argc, char *argv[]) {
       }
     } else {
       if ((width < 1) || (height < 1)) {
+	printf("Usage:\n");
+	printf("  guess width <nr> height <nr> <filename>\n");
         printf("can't process file without both width and heitht\n");
         return 1;
       }
