@@ -200,7 +200,7 @@ void subtitle_set_position(Subtitle sbt, int x_offset, int y_offset) {
    }
 }
 
-position subtitle_get_position(Subtitle sbt) {
+position subtitle_get_position(Subtitle sbt, int first_line_with_data) {
    position pos = BOTTOM;
 
    if (sbt == NULL) {
@@ -216,7 +216,7 @@ position subtitle_get_position(Subtitle sbt) {
       // values are valid for computation
       int left_margin = sbt->x_offset;
       int right_margin = sbt->video_width - (sbt->x_offset + sbt->width);
-      int top_margin = sbt->y_offset;
+      int top_margin = sbt->y_offset + first_line_with_data;
       int bottom_margin = sbt->video_height - (sbt->y_offset + sbt->height);
 
       if (left_margin > (right_margin * 2)) {

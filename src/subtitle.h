@@ -53,7 +53,7 @@ bool subtitle_is_visible(Subtitle sbt, int index);
 /*
  * Get the position of the subtitle on the screen
  */
-position subtitle_get_position(Subtitle sbt);
+position subtitle_get_position(Subtitle sbt, int first_ine_with_data);
 
 /* backward compatibility */
 #define get_new_subtitle()        subtitle_get_new()

@@ -1068,19 +1068,11 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
       return;
    }
 
-   position pos = subtitle_get_position(sbt);
-   if ((pos != TOP) && (pos != BOTTOM) && (pos != CENTER)) {
-      // printf("Subtitle %d in %s has position %d\n", nr, fname, pos);
-   }
-
-   output_start_item(subtitle_get_start_time(sbt),
-                     subtitle_get_end_time(sbt),
-                     pos);
-
    Bitmap bm = subtitle_bitmap(sbt);
    int *scan_lines;
    scan_lines = malloc(subtitle_get_height(sbt) * sizeof(int));
    int i, j;
+   int first_line_with_data = -1;
    for (i = 0; i < subtitle_get_height(sbt); i++) {
       scan_lines[i] = 0;
       for (j = 0; j < subtitle_get_width(sbt); j++) {
@@ -1088,7 +1080,19 @@ void process_subtitle(char *fname, int nr, LineSizes *sizes) {
             scan_lines[i]++;
          }
       }
+      if ((scan_lines[i] > 0) && (first_line_with_data < 0)) {
+	first_line_with_data = i;
+      }
    }
+
+   position pos = subtitle_get_position(sbt, first_line_with_data);
+   if ((pos != TOP) && (pos != BOTTOM) && (pos != CENTER)) {
+      // printf("Subtitle %d in %s has position %d\n", nr, fname, pos);
+   }
+
+   output_start_item(subtitle_get_start_time(sbt),
+                     subtitle_get_end_time(sbt),
+                     pos);
 
    // Determined the number of bits in each of the lines. Now try and
    // determine how many lines of text there are, and where the
