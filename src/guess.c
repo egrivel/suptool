@@ -12,7 +12,6 @@ void make_guess(char *code, int x_width, int x_height) {
   int baseline = code_to_baseline(code);
   bitmap_set_baseline(bm, baseline);
 
-
   Bitmap medium_bm = bitmap_to_medium(bm, baseline, x_width, x_height);
   char *medium_code = bitmap_to_code(medium_bm,
     bitmap_get_baseline(medium_bm));
@@ -93,7 +92,10 @@ void process_file(char *fname, int width, int height) {
           // Note: code_end can become -1 if line starts with 0
           code_end--;
           type_start = code_end + 2;
-        }
+        } else {
+	  printf("*** syntax error on '%s'\n", buffer);
+	  break;
+	}
         type_end = type_start;
         while (buffer[type_end]
                && (buffer[type_end] != ' ')
